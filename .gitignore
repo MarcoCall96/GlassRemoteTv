@@ -1,0 +1,11 @@
+# Pairing key and certificate: whoever has them can control your TV. Never commit.
+receiver/bridge-data/
+bridge-data/
+venv/
+.venv/
+__pycache__/
+*.pem
+*.key
+.env
+.DS_Store
+Thumbs.db
