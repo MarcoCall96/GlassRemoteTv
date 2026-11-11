@@ -1,0 +1,121 @@
+(window.I18N = window.I18N || {}).en = {
+  "c.edit": "Edit", "c.done": "Done", "c.cancel": "Cancel", "c.save": "Save", "c.add": "Add",
+  "c.retry": "Try again", "c.connect": "Connect TV", "c.switchTv": "Switch TV", "c.mute": "Mute",
+
+  "nav.sections": "Sections", "nav.tv": "TV", "nav.remote": "Remote", "nav.apps": "Apps", "nav.settings": "Settings",
+
+  "tv.title": "My TVs", "tv.addAria": "Add TV", "tv.all": "All TVs", "tv.filter": "TV filter",
+  "tv.favorites": "Favorites", "tv.allShort": "All", "tv.hint": "Tap a TV to see its details.",
+  "tv.scan": "Search TVs on the network", "tv.selected": "Selected", "tv.details": "Details of {name}",
+  "tv.unfav": "Remove from favorites: {name}", "tv.fav": "Add to favorites: {name}", "tv.link": "Connect {name}",
+  "tv.noFav": "No favorites. Tap the star on a TV to add it.", "tv.addCard": "Add TV", "tv.none": "No TV",
+
+  "status.bridgeOff": "Receiver off", "status.linked": "Connected", "status.pairing": "Needs pairing",
+  "status.noReply": "Not responding", "status.connecting": "Connecting…", "status.off": "Disconnected",
+
+  "hero.noTv": "No TV", "hero.noTvHint": "Add your first TV to get started.", "hero.standby": "Standby", "hero.on": "On",
+  "hero.turnOff": "Turn off {name}", "hero.turnOn": "Turn on {name}", "hero.now": "Now on TV",
+  "hero.open": "Open the remote", "hero.retry": "Receiver off · Try again", "hero.connecting": "Connecting…",
+  "hero.wakeToast": "Trying to turn the TV on…",
+
+  "scenes.title": "Scenes", "scenes.one": "Scene", "scenes.new": "New scene", "scenes.edit": "Edit scene",
+  "scenes.editAria": "Edit scene {name}", "scenes.startAria": "Start scene {name}", "scenes.noAction": "No action",
+  "scenes.vol": "Vol {n}", "scenes.min": "{n} min", "scenes.timer": "Timer", "scenes.timerLeft": "Turns off in {n} min",
+  "scenes.timerIdle": "Turn the TV off", "scenes.icon": "Icon", "scenes.color": "Color", "scenes.does": "What it does",
+  "scenes.openApp": "Open app", "scenes.never": "Never", "scenes.min15": "15 minutes", "scenes.min30": "30 minutes",
+  "scenes.hour1": "1 hour", "scenes.hour15": "1.5 hours", "scenes.turnOffAfter": "Turn off after",
+  "scenes.delete": "Delete scene", "scenes.noApp": "No app", "scenes.dontChange": "Don't change",
+  "scenes.nameFirst": "Give the scene a name.", "scenes.saved": "Scene {name} saved.", "scenes.deleted": "Scene deleted.",
+  "scenes.saveFail": "Receiver unreachable: scene not saved.", "scenes.running": "Scene {name} running…",
+  "scenes.cinema": "Cinema", "scenes.night": "Night", "scenes.slug": "scene",
+
+  "toast.connectFirst": "Connect the TV first.", "toast.notLinked": "The TV is not connected.",
+  "toast.retryBridge": "Trying to reach the receiver again…",
+
+  "timer.aria": "Sleep timer", "timer.title": "Turn the TV off in", "timer.minutes": "minutes", "timer.hour": "hour",
+  "timer.hours": "hours", "timer.oneHalf": "1.5", "timer.cancel": "cancel",
+  "timer.left": "The TV will turn off in {n} min.", "timer.idle": "The TV goes to standby at the chosen time.",
+  "timer.set": "The TV will turn off in {n} min.", "timer.canceled": "Timer canceled.",
+
+  "add.title": "Add a TV", "add.name": "Name", "add.namePh": "Bedroom TV", "add.ip": "IP address",
+  "add.ipPh": "TV address", "add.defaultName": "New TV", "brand.ready": "available", "brand.soon": "coming soon",
+
+  "pair.title": "Pair the TV", "pair.hint": "A 6-character code appeared on the TV. Type it below: you only need to do this once.",
+  "pair.codeAria": "Code shown on the TV", "pair.button": "Pair",
+
+  "switch.selected": "TV selected: {name}", "switch.add": "Add TV…",
+  "shortcut.title": "New shortcut", "shortcut.package": "Package",
+
+  "remote.title": "Remote", "remote.power": "Turn the TV on or off", "remote.input": "Change input",
+  "remote.back": "Back", "remote.home": "Home", "remote.menu": "Menu", "remote.rewind": "Rewind",
+  "remote.playPause": "Play and pause", "remote.forward": "Fast forward", "remote.volume": "Volume",
+  "remote.volUp": "Volume up", "remote.volDown": "Volume down", "remote.volShort": "Vol", "remote.guide": "Guide",
+  "remote.exit": "Exit", "remote.channel": "Channel", "remote.chUp": "Channel up", "remote.chDown": "Channel down",
+  "remote.chShort": "Ch", "remote.dpad": "Navigation arrows", "remote.up": "Up", "remote.left": "Left",
+  "remote.right": "Right", "remote.down": "Down", "remote.touchAria": "Touchpad: swipe to move, tap for OK",
+  "remote.touchHint": "Swipe to move", "remote.touchTap": "Tap for OK", "remote.delete": "Delete",
+  "remote.enterAria": "Enter", "remote.kbPlaceholder": "Tap to type or dictate…", "remote.kbAria": "Text to send to the TV",
+  "remote.paste": "Paste from clipboard", "remote.mode": "Remote mode", "remote.modeDpad": "Arrows",
+  "remote.modeTouch": "Touch", "remote.modeNumbers": "Numbers", "remote.modeKeyboard": "Keyboard",
+
+  "off.disc": "TV disconnected", "off.discSub": "Connect the TV to use the remote.",
+  "off.noBridge": "Receiver unreachable", "off.noBridgeSub": "Turn on the receiver on your computer, on the same Wi-Fi, and try again.",
+  "off.waitCode": "Waiting for the code", "off.waitCodeSub": "Type the code shown on the TV.",
+  "off.noReply": "The TV is not responding", "off.connecting": "Connecting…", "off.connectingSub": "Waiting for the TV to answer.",
+
+  "apps.title": "Apps", "apps.recents": "Recent", "apps.all": "All apps",
+  "apps.hint": "Tap an app to open it on the TV right away.",
+  "apps.hintEdit": "Tap − to remove an app from the list. Use Add to create a shortcut.",
+  "apps.remove": "Delete {name}", "apps.hide": "Hide {name}", "apps.addAria": "Add shortcut",
+  "apps.restore": "Show hidden apps again ({n})", "apps.opening": "Opening {name}…",
+  "apps.needFields": "Enter a name and a package.",
+
+  "kb.shift": "Shift", "kb.symbols": "Symbols", "kb.space": "space", "kb.enter": "Enter",
+  "kb.empty": "The clipboard is empty.", "kb.pasteFail": "Can't read the clipboard: tap the field and paste.",
+
+  "scan.noBridge": "No receiver connected: the app is in demo mode.", "scan.searching": "Searching the Wi-Fi network for TVs…",
+  "scan.found.one": "{n} controllable TV on the network", "scan.found.other": "{n} controllable TVs on the network",
+  "scan.newN.one": "{n} new", "scan.newN.other": "{n} new", "scan.unsupported": "{n} not supported yet.",
+  "scan.onlyUnsupported.one": "Found {n} TV, but it is not supported yet.",
+  "scan.onlyUnsupported.other": "Found {n} TVs, but they are not supported yet.",
+  "scan.nothing": "No TV found on the network.", "scan.unreachable": "Receiver unreachable: check that it is on.",
+
+  "conn.waiting": "Receiver: waiting…", "conn.ok": "Receiver reachable.", "conn.ko": "Receiver unreachable.",
+  "conn.none": "No receiver connected.",
+
+  "err.unreachable": "The TV is unreachable.", "err.wrong_code": "Wrong code: read the new code on the TV.",
+  "err.pairing_expired": "Pairing expired: try again.",
+
+  "settings.title": "Settings", "settings.language": "Language", "settings.langAuto": "Automatic (phone language)",
+  "settings.siri": "Siri and Shortcuts",
+  "settings.siriHint": "In <b>Shortcuts</b> choose <b>Get contents of URL</b>, paste the address and name the shortcut with the phrase you will say to Siri. It only works on your home Wi-Fi.",
+  "settings.usage": "Usage", "settings.oneHand": "One-handed mode", "settings.haptic": "Key vibration",
+  "settings.hapticHint": "Vibration only works on Android: iPhone does not allow it for web apps.",
+  "settings.advanced": "Advanced", "settings.bridge": "Receiver address", "settings.bridgePh": "Empty = automatic",
+  "settings.saveBridge": "Save and connect", "settings.footer": "GlassRemote v0.3 · no ads",
+
+  "siri.noBridge": "Open the app from the receiver address to see the addresses.", "siri.on": "Turn on the TV",
+  "siri.off": "Turn off the TV", "siri.mute": "Mute", "siri.sleep30": "Turn off in 30 minutes",
+  "siri.scene": "Scene {name}", "siri.copy": "Copy", "siri.copyAria": "Copy the address: {name}",
+  "siri.copied": "Address copied.", "siri.prompt": "Copy this address:",
+
+  "detail.aria": "TV details", "detail.close": "Close", "detail.rename": "Rename", "detail.copyIp": "Copy IP address",
+  "detail.favorite": "Favorite", "detail.remove": "Delete the TV", "detail.confirm": "Confirm",
+  "detail.confirmAria": "Confirm deletion", "detail.toggle": "Connect or disconnect", "detail.use": "Use as remote",
+  "detail.cannotRead": "Can't read the TV data.",
+  "detail.cannotReadHint": "Check that the receiver is on and the TV is on the same network.",
+  "detail.status": "Status", "detail.link": "Connection", "detail.power": "Power", "detail.runningApp": "App in use",
+  "detail.muted": "muted", "detail.latency": "Response time", "detail.device": "Device", "detail.maker": "Manufacturer",
+  "detail.model": "Model", "detail.uptime": "On for", "detail.tech": "Technical details", "detail.mac": "MAC address",
+  "detail.connType": "Network", "detail.ports": "Open ports", "detail.sw": "Software", "detail.cast": "Cast firmware",
+  "detail.locale": "Language", "detail.updates": "Updates", "detail.avail": "Available", "detail.none": "None",
+  "detail.udn": "Device ID",
+  "detail.note": "Data read from your home network. The app only sends commands: it does not read the screen, files or contents of the TV.",
+  "detail.nameAria": "TV name", "detail.saveName": "Save the name", "detail.more": "More actions",
+  "detail.deleted": "TV deleted. You can find it again with “Search TVs on the network”.",
+  "detail.ipCopied": "IP address copied.",
+  "port.6466": "Remote control", "port.6467": "Pairing", "port.8008": "Cast (HTTP)", "port.8009": "Cast (TLS)", "port.8443": "Cast (setup)",
+  "up.days": "{d} days {h} h", "up.hours": "{h} h {m} min", "up.min": "{m} min",
+
+  "sys.screensaver": "Screensaver", "sys.home": "Home screen", "sys.settings": "TV settings", "sys.playStore": "Play Store",
+};

@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#06070c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GlassRemote">
+  <title>GlassRemote</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="./assets/icon-192.png">
+  <!-- splash-ios:start -->
+  <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./assets/splash/splash-1320x2868.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./assets/splash/splash-1206x2622.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./assets/splash/splash-1290x2796.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./assets/splash/splash-1179x2556.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./assets/splash/splash-1284x2778.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./assets/splash/splash-1170x2532.png">
+  <!-- splash-ios:end -->
+  <link rel="stylesheet" href="./styles.css?v=53">
+  <script defer src="./lang/en.js?v=53"></script>
+  <script defer src="./lang/it.js?v=53"></script>
+  <script defer src="./lang/es.js?v=53"></script>
+  <script defer src="./lang/fr.js?v=53"></script>
+  <script defer src="./lang/de.js?v=53"></script>
+  <script defer src="./lang/pt.js?v=53"></script>
+  <script defer src="./i18n.js?v=53"></script>
+  <script defer src="./logos.js?v=53"></script>
+  <script defer src="./app.js?v=53"></script>
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- ===== TV ===== -->
+    <section class="screen active" id="screen-tv" aria-label="My TVs" data-i18n-aria="tv.title">
+      <header class="topbar">
+        <h1 data-i18n="tv.title">My TVs</h1>
+        <button class="glass round" id="addTvTop" aria-label="Add TV" data-i18n-aria="tv.addAria">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </header>
+      <div class="scroll">
+        <div id="hero"></div>
+
+        <div class="sect-head"><h2 data-i18n="tv.all">All TVs</h2></div>
+        <div class="segmented two" id="favSeg" role="group" aria-label="TV filter" data-i18n-aria="tv.filter">
+          <button data-filter="fav" aria-pressed="false" data-i18n="tv.favorites">Favorites</button>
+          <button data-filter="all" aria-pressed="true" class="on" data-i18n="tv.allShort">All</button>
+        </div>
+        <div class="tv-grid" id="tvGrid"></div>
+        <p class="footnote" id="scanHint" data-i18n="tv.hint">Tap a TV to see its details.</p>
+        <button class="link center" id="scanBtn" data-i18n="tv.scan">Search TVs on the network</button>
+
+        <div class="sect-head"><h2 data-i18n="scenes.title">Scenes</h2><button class="link" id="scenesEdit" aria-pressed="false" data-i18n="c.edit">Edit</button></div>
+        <div class="scene-row" id="sceneRow"></div>
+      </div>
+    </section>
+
+    <!-- ===== Remote ===== -->
+    <section class="screen" id="screen-remote" aria-label="Remote" data-i18n-aria="remote.title">
+      <header class="topbar remote-top">
+        <button class="glass round power" data-key="POWER" aria-label="Turn the TV on or off" data-i18n-aria="remote.power">
+          <svg viewBox="0 0 24 24"><path d="M12 3v9M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>
+        </button>
+        <button class="glass tv-title" id="tvTitle" aria-label="Switch TV" data-i18n-aria="c.switchTv">
+          <span class="dot" id="statusDot"></span><span id="tvName">TV</span>
+          <svg class="chev" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg>
+        </button>
+        <button class="glass round" data-key="TV_INPUT" aria-label="Change input" data-i18n-aria="remote.input">
+          <svg viewBox="0 0 24 24"><path d="M4 8V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M3 12h13M13 9l3 3-3 3"/></svg>
+        </button>
+      </header>
+
+      <div class="remote">
+        <div class="quick">
+          <button class="glass pill rep" data-key="BACK"><svg viewBox="0 0 24 24"><path d="M9 8L4 12l5 4M4 12h10a6 6 0 0 1 6 6"/></svg><span data-i18n="remote.back">Back</span></button>
+          <button class="glass pill" data-key="HOME"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span data-i18n="remote.home">Home</span></button>
+          <button class="glass pill" data-key="MENU"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span data-i18n="remote.menu">Menu</span></button>
+        </div>
+
+        <div class="media">
+          <button class="glass round rep" data-key="MEDIA_REWIND" aria-label="Rewind" data-i18n-aria="remote.rewind"><svg class="fill" viewBox="0 0 24 24"><path d="M11 6l-7 6 7 6zM20 6l-7 6 7 6z"/></svg></button>
+          <button class="glass round" data-key="MEDIA_PLAY_PAUSE" aria-label="Play and pause" data-i18n-aria="remote.playPause"><svg class="fill" viewBox="0 0 26 24"><path d="M3 5l9 7-9 7zM15 5h3v14h-3zM20.5 5h3v14h-3z"/></svg></button>
+          <button class="glass round rep" data-key="MEDIA_FAST_FORWARD" aria-label="Fast forward" data-i18n-aria="remote.forward"><svg class="fill" viewBox="0 0 24 24"><path d="M13 6l7 6-7 6zM4 6l7 6-7 6z"/></svg></button>
+        </div>
+
+        <div class="controls">
+          <div class="glass rocker" role="group" aria-label="Volume" data-i18n-aria="remote.volume">
+            <button class="rep" data-key="VOLUME_UP" aria-label="Volume up" data-i18n-aria="remote.volUp"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></button>
+            <span data-i18n="remote.volShort">Vol</span>
+            <button class="rep" data-key="VOLUME_DOWN" aria-label="Volume down" data-i18n-aria="remote.volDown"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+          </div>
+          <div class="center-keys">
+            <button class="glass pill" data-key="VOLUME_MUTE"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM17 9l4 6M21 9l-4 6"/></svg><span data-i18n="c.mute">Mute</span></button>
+            <button class="glass pill" data-key="GUIDE"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h4"/></svg><span data-i18n="remote.guide">Guide</span></button>
+            <button class="glass pill" data-key="EXIT"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg><span data-i18n="remote.exit">Exit</span></button>
+          </div>
+          <div class="glass rocker" role="group" aria-label="Channel" data-i18n-aria="remote.channel">
+            <button class="rep" data-key="CHANNEL_UP" aria-label="Channel up" data-i18n-aria="remote.chUp"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
+            <span data-i18n="remote.chShort">Ch</span>
+            <button class="rep" data-key="CHANNEL_DOWN" aria-label="Channel down" data-i18n-aria="remote.chDown"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+          </div>
+        </div>
+
+        <div class="mode-pane active" data-pane="dpad">
+          <div class="glass dpad" role="group" aria-label="Navigation arrows" data-i18n-aria="remote.dpad">
+            <button class="d up rep" data-key="DPAD_UP" aria-label="Up" data-i18n-aria="remote.up"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
+            <button class="d left rep" data-key="DPAD_LEFT" aria-label="Left" data-i18n-aria="remote.left"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <button class="d ok" data-key="DPAD_CENTER" aria-label="OK">OK</button>
+            <button class="d right rep" data-key="DPAD_RIGHT" aria-label="Right" data-i18n-aria="remote.right"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+            <button class="d down rep" data-key="DPAD_DOWN" aria-label="Down" data-i18n-aria="remote.down"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+          </div>
+        </div>
+
+        <div class="mode-pane" data-pane="touch">
+          <div class="glass touchpad" id="touchpad" role="application" aria-label="Touchpad: swipe to move, tap for OK" data-i18n-aria="remote.touchAria">
+            <i class="tp up"></i><i class="tp down"></i><i class="tp left"></i><i class="tp right"></i>
+            <span class="tp-hint"><span data-i18n="remote.touchHint">Swipe to move</span><br><small data-i18n="remote.touchTap">Tap for OK</small></span>
+            <span class="tp-dot" id="tpDot" hidden></span>
+          </div>
+        </div>
+
+        <div class="mode-pane" data-pane="numbers">
+          <div class="numpad">
+            <button class="glass" data-key="1">1</button><button class="glass" data-key="2">2</button><button class="glass" data-key="3">3</button>
+            <button class="glass" data-key="4">4</button><button class="glass" data-key="5">5</button><button class="glass" data-key="6">6</button>
+            <button class="glass" data-key="7">7</button><button class="glass" data-key="8">8</button><button class="glass" data-key="9">9</button>
+            <button class="glass" data-key="DEL" aria-label="Delete" data-i18n-aria="remote.delete">⌫</button><button class="glass" data-key="0">0</button><button class="glass" data-key="ENTER" aria-label="Enter" data-i18n-aria="remote.enterAria">↵</button>
+          </div>
+        </div>
+
+        <div class="mode-pane" data-pane="keyboard">
+          <div class="kb">
+            <div class="kb-field">
+              <input id="kbInput" type="text" placeholder="Tap to type or dictate…" data-i18n-ph="remote.kbPlaceholder" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="send" aria-label="Text to send to the TV" data-i18n-aria="remote.kbAria">
+              <button class="glass" id="kbPaste" aria-label="Paste from clipboard" data-i18n-aria="remote.paste"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="12" height="16" rx="2.5"/><path d="M9 5V4h6v1M9 11h6M9 15h4"/></svg></button>
+            </div>
+            <div class="kb-rows" id="kbRows"></div>
+          </div>
+        </div>
+
+        <div class="glass segmented" id="modeSeg" role="group" aria-label="Remote mode" data-i18n-aria="remote.mode">
+          <button class="on" data-mode="dpad" aria-pressed="true" data-i18n="remote.modeDpad">Arrows</button>
+          <button data-mode="touch" aria-pressed="false" data-i18n="remote.modeTouch">Touch</button>
+          <button data-mode="numbers" aria-pressed="false" data-i18n="remote.modeNumbers">Numbers</button>
+          <button data-mode="keyboard" aria-pressed="false" data-i18n="remote.modeKeyboard">Keyboard</button>
+        </div>
+      </div>
+
+      <div class="remote-off" id="remoteOff" hidden>
+        <div class="glass off-card">
+          <span class="off-ico"><svg viewBox="0 0 24 24"><path d="M12 3v9M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></span>
+          <h3 id="offMsg">TV disconnected</h3>
+          <p id="offSub">Connect the TV to use the remote.</p>
+          <button class="cta" id="offConnect" data-i18n="c.connect">Connect TV</button>
+          <button class="link center" id="offSwitch" data-i18n="c.switchTv">Switch TV</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Apps ===== -->
+    <section class="screen" id="screen-apps" aria-label="Apps" data-i18n-aria="apps.title">
+      <header class="topbar">
+        <h1 data-i18n="apps.title">Apps</h1>
+        <button class="link" id="appsEdit" aria-pressed="false" data-i18n="c.edit">Edit</button>
+      </header>
+      <div class="scroll">
+        <button class="glass tv-chip" id="appsTv" aria-label="Switch TV" data-i18n-aria="c.switchTv"></button>
+        <div id="recentsBox" hidden>
+          <div class="sect-head"><h2 data-i18n="apps.recents">Recent</h2></div>
+          <div class="recents" id="recents"></div>
+        </div>
+        <div class="sect-head"><h2 data-i18n="apps.all">All apps</h2></div>
+        <div class="apps-big" id="appsGrid"></div>
+        <button class="link center" id="appsRestore" hidden></button>
+        <p class="footnote" id="appsHint">Tap an app to open it on the TV right away.</p>
+      </div>
+    </section>
+
+    <!-- ===== Settings ===== -->
+    <section class="screen" id="screen-settings" aria-label="Settings" data-i18n-aria="settings.title">
+      <header class="topbar"><h1 data-i18n="settings.title">Settings</h1></header>
+      <div class="scroll">
+        <div class="sect-head"><h2 data-i18n="settings.language">Language</h2></div>
+        <div class="group">
+          <button class="row lang-row" id="langBtn" aria-haspopup="dialog">
+            <span data-i18n="settings.language">Language</span>
+            <span class="lang-cur"><b id="langCur"></b><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>
+          </button>
+        </div>
+
+        <div class="sect-head"><h2 data-i18n="settings.siri">Siri and Shortcuts</h2></div>
+        <div class="group" id="siriList"></div>
+        <p class="hint pad" data-i18n-html="settings.siriHint">In <b>Shortcuts</b> choose <b>Get contents of URL</b>, paste the address and name the shortcut with the phrase you will say to Siri. It only works on your home Wi-Fi.</p>
+
+        <div class="sect-head"><h2 data-i18n="settings.usage">Usage</h2></div>
+        <div class="group">
+          <div class="row"><span id="lblOne" data-i18n="settings.oneHand">One-handed mode</span>
+            <button class="switch" id="oneSwitch" role="switch" aria-checked="false" aria-labelledby="lblOne"><i></i></button></div>
+          <div class="row"><span id="lblHap" data-i18n="settings.haptic">Key vibration</span>
+            <button class="switch" id="hapticSwitch" role="switch" aria-checked="true" aria-labelledby="lblHap"><i></i></button></div>
+        </div>
+        <p class="hint pad" data-i18n="settings.hapticHint">Vibration only works on Android: iPhone does not allow it for web apps.</p>
+
+        <details class="adv">
+          <summary><span data-i18n="settings.advanced">Advanced</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+          <div class="group">
+            <label class="row col"><span data-i18n="settings.bridge">Receiver address</span>
+              <input id="bridgeUrl" type="text" placeholder="Empty = automatic" data-i18n-ph="settings.bridgePh" autocapitalize="none" autocorrect="off"></label>
+            <div class="row"><button class="link strong" id="saveBridge" data-i18n="settings.saveBridge">Save and connect</button></div>
+          </div>
+          <p class="hint pad" id="connHint">Receiver: waiting…</p>
+        </details>
+        <p class="footnote" data-i18n="settings.footer">GlassRemote v0.3 · no ads</p>
+      </div>
+    </section>
+
+    <!-- bottom bar -->
+    <nav class="glass tabbar" id="tabbar" aria-label="Sections" data-i18n-aria="nav.sections">
+      <button class="tab on" data-screen="tv" aria-current="page"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2.5"/><path d="M8 21h8M12 17v4"/></svg><span data-i18n="nav.tv">TV</span></button>
+      <button class="tab" data-screen="remote"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="3"/><circle cx="12" cy="8" r="1.6"/><path d="M10 14h4M10 17h4"/></svg><span data-i18n="nav.remote">Remote</span></button>
+      <button class="tab" data-screen="apps"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span data-i18n="nav.apps">Apps</span></button>
+      <button class="tab" data-screen="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg><span data-i18n="nav.settings">Settings</span></button>
+    </nav>
+
+    <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
+
+    <!-- Add TV -->
+    <div class="sheet" id="addSheet" role="dialog" aria-modal="true" aria-label="Add a TV" data-i18n-aria="add.title" hidden>
+      <div class="grabber"></div>
+      <h3 data-i18n="add.title">Add a TV</h3>
+      <div class="brand-grid" id="brandGrid"></div>
+      <div class="group">
+        <label class="row"><span data-i18n="add.name">Name</span><input id="newName" type="text" placeholder="Bedroom TV" data-i18n-ph="add.namePh"></label>
+        <label class="row"><span data-i18n="add.ip">IP address</span><input id="newHost" type="text" inputmode="decimal" placeholder="TV address" data-i18n-ph="add.ipPh"></label>
+      </div>
+      <button class="cta" id="saveTv" data-i18n="c.add">Add</button>
+    </div>
+
+    <!-- Pairing -->
+    <div class="sheet" id="pairSheet" role="dialog" aria-modal="true" aria-label="Pair the TV" data-i18n-aria="pair.title" hidden>
+      <div class="grabber"></div>
+      <h3 data-i18n="pair.title">Pair the TV</h3>
+      <p class="hint" data-i18n="pair.hint">A 6-character code appeared on the TV. Type it below: you only need to do this once.</p>
+      <input class="code-input" id="pairCode" type="text" maxlength="6" placeholder="A1B2C3" autocapitalize="characters" autocomplete="off" aria-label="Code shown on the TV" data-i18n-aria="pair.codeAria">
+      <p class="hint err" id="pairMsg" role="alert"></p>
+      <button class="cta" id="pairBtn" data-i18n="pair.button">Pair</button>
+    </div>
+
+    <!-- Language -->
+    <div class="sheet" id="langSheet" role="dialog" aria-modal="true" aria-label="Language" data-i18n-aria="settings.language" hidden>
+      <div class="grabber"></div>
+      <h3 data-i18n="settings.language">Language</h3>
+      <div class="group" id="langList"></div>
+    </div>
+
+    <!-- Quick TV switch -->
+    <div class="sheet" id="switchSheet" role="dialog" aria-modal="true" aria-label="Switch TV" data-i18n-aria="c.switchTv" hidden>
+      <div class="grabber"></div>
+      <h3 data-i18n="c.switchTv">Switch TV</h3>
+      <div class="group" id="switchList"></div>
+    </div>
+
+    <!-- Sleep timer -->
+    <div class="sheet" id="timerSheet" role="dialog" aria-modal="true" aria-label="Sleep timer" data-i18n-aria="timer.aria" hidden>
+      <div class="grabber"></div>
+      <h3 data-i18n="timer.title">Turn the TV off in</h3>
+      <p class="hint" id="timerInfo"></p>
+      <div class="timer-grid" id="timerGrid">
+        <button class="glass" data-min="15"><b>15</b><small data-i18n="timer.minutes">minutes</small></button>
+        <button class="glass" data-min="30"><b>30</b><small data-i18n="timer.minutes">minutes</small></button>
+        <button class="glass" data-min="60"><b>1</b><small data-i18n="timer.hour">hour</small></button>
+        <button class="glass" data-min="90"><b data-i18n="timer.oneHalf">1.5</b><small data-i18n="timer.hours">hours</small></button>
+        <button class="glass" data-min="120"><b>2</b><small data-i18n="timer.hours">hours</small></button>
+        <button class="glass cancel" data-min="0"><b>–</b><small data-i18n="timer.cancel">cancel</small></button>
+      </div>
+    </div>
+
+    <!-- New personal app -->
+    <div class="sheet" id="appSheet" role="dialog" aria-modal="true" aria-label="New shortcut" data-i18n-aria="shortcut.title" hidden>
+      <div class="grabber"></div>
+      <h3 data-i18n="shortcut.title">New shortcut</h3>
+      <div class="group">
+        <label class="row"><span data-i18n="add.name">Name</span><input id="appName" type="text" placeholder="Twitch" maxlength="14"></label>
+        <label class="row"><span data-i18n="shortcut.package">Package</span><input id="appPkg" type="text" placeholder="tv.twitch.android.app" autocapitalize="none" autocorrect="off"></label>
+      </div>
+      <button class="cta" id="appSave" data-i18n="c.add">Add</button>
+    </div>
+
+    <!-- Scene -->
+    <div class="sheet tall" id="sceneSheet" role="dialog" aria-modal="true" aria-label="Scene" data-i18n-aria="scenes.one" hidden>
+      <div class="sheet-head">
+        <button class="link" id="scCancel" data-i18n="c.cancel">Cancel</button>
+        <h3 id="sceneTitle">New scene</h3>
+        <button class="link strong" id="scSave" data-i18n="c.save">Save</button>
+      </div>
+      <div class="scene-preview"><div class="scene-tile" id="scPreview"></div></div>
+      <div class="group">
+        <label class="row"><span data-i18n="add.name">Name</span><input id="scName" type="text" maxlength="16" placeholder="Cinema"></label>
+      </div>
+      <div class="grp-title" data-i18n="scenes.icon">Icon</div>
+      <div class="icon-grid" id="scIcons" role="radiogroup" aria-label="Icon" data-i18n-aria="scenes.icon"></div>
+      <div class="grp-title" data-i18n="scenes.color">Color</div>
+      <div class="swatches" id="scColors" role="radiogroup" aria-label="Color" data-i18n-aria="scenes.color"></div>
+      <div class="grp-title" data-i18n="scenes.does">What it does</div>
+      <div class="group">
+        <label class="row"><span data-i18n="scenes.openApp">Open app</span><select id="scApp"></select></label>
+        <div class="row col"><div class="row-top"><span data-i18n="remote.volume">Volume</span><b id="scVolOut">Don't change</b></div>
+          <input type="range" id="scVol" min="-1" max="100" value="-1" aria-label="Volume" data-i18n-aria="remote.volume"></div>
+        <label class="row"><span data-i18n="scenes.turnOffAfter">Turn off after</span>
+          <select id="scTimer"><option value="0" data-i18n="scenes.never">Never</option><option value="15" data-i18n="scenes.min15">15 minutes</option><option value="30" data-i18n="scenes.min30">30 minutes</option><option value="60" data-i18n="scenes.hour1">1 hour</option><option value="90" data-i18n="scenes.hour15">1.5 hours</option></select></label>
+      </div>
+      <button class="link danger center" id="scDelete" data-i18n="scenes.delete">Delete scene</button>
+    </div>
+
+    <!-- TV details card: the card flips and opens -->
+    <div class="flip-wrap" id="flip" hidden>
+      <div class="flip-inner" id="flipInner">
+        <div class="flip-face front" id="flipFront" aria-hidden="true"></div>
+        <div class="flip-face back" id="flipBack" role="dialog" aria-modal="true" aria-label="TV details" data-i18n-aria="detail.aria"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

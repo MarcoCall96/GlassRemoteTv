@@ -1,0 +1,121 @@
+(window.I18N = window.I18N || {}).pt = {
+  "c.edit": "Editar", "c.done": "Concluir", "c.cancel": "Cancelar", "c.save": "Guardar", "c.add": "Adicionar",
+  "c.retry": "Tentar de novo", "c.connect": "Ligar a TV", "c.switchTv": "Mudar de TV", "c.mute": "Silêncio",
+
+  "nav.sections": "Secções", "nav.tv": "TV", "nav.remote": "Comando", "nav.apps": "Apps", "nav.settings": "Definições",
+
+  "tv.title": "As minhas TV", "tv.addAria": "Adicionar TV", "tv.all": "Todas as TV", "tv.filter": "Filtro de TV",
+  "tv.favorites": "Favoritas", "tv.allShort": "Todas", "tv.hint": "Toque numa TV para ver os detalhes.",
+  "tv.scan": "Procurar TV na rede", "tv.selected": "Selecionada", "tv.details": "Detalhes de {name}",
+  "tv.unfav": "Remover dos favoritos: {name}", "tv.fav": "Adicionar aos favoritos: {name}", "tv.link": "Ligar {name}",
+  "tv.noFav": "Sem favoritas. Toque na estrela de uma TV para a adicionar.", "tv.addCard": "Adicionar TV", "tv.none": "Nenhuma TV",
+
+  "status.bridgeOff": "Recetor desligado", "status.linked": "Ligada", "status.pairing": "Por emparelhar",
+  "status.noReply": "Não responde", "status.connecting": "A ligar…", "status.off": "Desligada",
+
+  "hero.noTv": "Nenhuma TV", "hero.noTvHint": "Adicione a sua primeira TV para começar.", "hero.standby": "Em espera", "hero.on": "Ligada",
+  "hero.turnOff": "Desligar {name}", "hero.turnOn": "Ligar {name}", "hero.now": "Agora na TV",
+  "hero.open": "Abrir o comando", "hero.retry": "Recetor desligado · Tentar de novo", "hero.connecting": "A ligar…",
+  "hero.wakeToast": "A tentar ligar a TV…",
+
+  "scenes.title": "Cenas", "scenes.one": "Cena", "scenes.new": "Nova cena", "scenes.edit": "Editar cena",
+  "scenes.editAria": "Editar a cena {name}", "scenes.startAria": "Iniciar a cena {name}", "scenes.noAction": "Nenhuma ação",
+  "scenes.vol": "Vol {n}", "scenes.min": "{n} min", "scenes.timer": "Temporizador", "scenes.timerLeft": "Desliga em {n} min",
+  "scenes.timerIdle": "Desligar a TV", "scenes.icon": "Ícone", "scenes.color": "Cor", "scenes.does": "O que faz",
+  "scenes.openApp": "Abrir app", "scenes.never": "Nunca", "scenes.min15": "15 minutos", "scenes.min30": "30 minutos",
+  "scenes.hour1": "1 hora", "scenes.hour15": "1,5 horas", "scenes.turnOffAfter": "Desligar após",
+  "scenes.delete": "Eliminar cena", "scenes.noApp": "Nenhuma app", "scenes.dontChange": "Não alterar",
+  "scenes.nameFirst": "Dê um nome à cena.", "scenes.saved": "Cena {name} guardada.", "scenes.deleted": "Cena eliminada.",
+  "scenes.saveFail": "Recetor inacessível: cena não guardada.", "scenes.running": "Cena {name} em curso…",
+  "scenes.cinema": "Cinema", "scenes.night": "Noite", "scenes.slug": "cena",
+
+  "toast.connectFirst": "Ligue primeiro a TV.", "toast.notLinked": "A TV não está ligada.",
+  "toast.retryBridge": "A tentar ligar de novo ao recetor…",
+
+  "timer.aria": "Temporizador de desligar", "timer.title": "Desligar a TV daqui a", "timer.minutes": "minutos", "timer.hour": "hora",
+  "timer.hours": "horas", "timer.oneHalf": "1,5", "timer.cancel": "cancelar",
+  "timer.left": "A TV vai desligar daqui a {n} min.", "timer.idle": "A TV passa a espera à hora escolhida.",
+  "timer.set": "A TV vai desligar daqui a {n} min.", "timer.canceled": "Temporizador cancelado.",
+
+  "add.title": "Adicionar uma TV", "add.name": "Nome", "add.namePh": "TV do quarto", "add.ip": "Endereço IP",
+  "add.ipPh": "Endereço da TV", "add.defaultName": "Nova TV", "brand.ready": "disponível", "brand.soon": "em breve",
+
+  "pair.title": "Emparelhar a TV", "pair.hint": "Apareceu na TV um código de 6 caracteres. Escreva-o abaixo: só é preciso uma vez.",
+  "pair.codeAria": "Código mostrado na TV", "pair.button": "Emparelhar",
+
+  "switch.selected": "TV selecionada: {name}", "switch.add": "Adicionar TV…",
+  "shortcut.title": "Novo atalho", "shortcut.package": "Pacote",
+
+  "remote.title": "Comando", "remote.power": "Ligar ou desligar a TV", "remote.input": "Mudar de entrada",
+  "remote.back": "Voltar", "remote.home": "Início", "remote.menu": "Menu", "remote.rewind": "Recuar",
+  "remote.playPause": "Reproduzir e pausa", "remote.forward": "Avançar", "remote.volume": "Volume",
+  "remote.volUp": "Aumentar volume", "remote.volDown": "Diminuir volume", "remote.volShort": "Vol", "remote.guide": "Guia",
+  "remote.exit": "Sair", "remote.channel": "Canal", "remote.chUp": "Canal seguinte", "remote.chDown": "Canal anterior",
+  "remote.chShort": "Ch", "remote.dpad": "Setas de navegação", "remote.up": "Cima", "remote.left": "Esquerda",
+  "remote.right": "Direita", "remote.down": "Baixo", "remote.touchAria": "Touchpad: deslize para mover, toque para OK",
+  "remote.touchHint": "Deslize para mover", "remote.touchTap": "Toque para OK", "remote.delete": "Apagar",
+  "remote.enterAria": "Enter", "remote.kbPlaceholder": "Toque para escrever ou ditar…", "remote.kbAria": "Texto a enviar para a TV",
+  "remote.paste": "Colar da área de transferência", "remote.mode": "Modo do comando", "remote.modeDpad": "Setas",
+  "remote.modeTouch": "Toque", "remote.modeNumbers": "Números", "remote.modeKeyboard": "Teclado",
+
+  "off.disc": "TV desligada", "off.discSub": "Ligue a TV para usar o comando.",
+  "off.noBridge": "Recetor inacessível", "off.noBridgeSub": "Ligue o recetor no seu computador, na mesma rede Wi-Fi, e tente de novo.",
+  "off.waitCode": "À espera do código", "off.waitCodeSub": "Escreva o código mostrado na TV.",
+  "off.noReply": "A TV não responde", "off.connecting": "A ligar…", "off.connectingSub": "A aguardar a resposta da TV.",
+
+  "apps.title": "Apps", "apps.recents": "Recentes", "apps.all": "Todas as apps",
+  "apps.hint": "Toque numa app para a abrir de imediato na TV.",
+  "apps.hintEdit": "Toque em − para tirar uma app da lista. Com Adicionar cria um atalho.",
+  "apps.remove": "Eliminar {name}", "apps.hide": "Ocultar {name}", "apps.addAria": "Adicionar atalho",
+  "apps.restore": "Mostrar de novo as apps ocultas ({n})", "apps.opening": "A abrir {name}…",
+  "apps.needFields": "Escreva um nome e um pacote.",
+
+  "kb.shift": "Maiúsculas", "kb.symbols": "Símbolos", "kb.space": "espaço", "kb.enter": "Enter",
+  "kb.empty": "A área de transferência está vazia.", "kb.pasteFail": "Não consigo ler a área de transferência: toque no campo e cole.",
+
+  "scan.noBridge": "Nenhum recetor ligado: a app está em modo de demonstração.", "scan.searching": "A procurar TV na rede Wi-Fi…",
+  "scan.found.one": "{n} TV controlável na rede", "scan.found.other": "{n} TV controláveis na rede",
+  "scan.newN.one": "{n} nova", "scan.newN.other": "{n} novas", "scan.unsupported": "{n} ainda sem suporte.",
+  "scan.onlyUnsupported.one": "Encontrada {n} TV, mas ainda sem suporte.",
+  "scan.onlyUnsupported.other": "Encontradas {n} TV, mas ainda sem suporte.",
+  "scan.nothing": "Nenhuma TV encontrada na rede.", "scan.unreachable": "Recetor inacessível: verifique se está ligado.",
+
+  "conn.waiting": "Recetor: à espera…", "conn.ok": "Recetor acessível.", "conn.ko": "Recetor inacessível.",
+  "conn.none": "Nenhum recetor ligado.",
+
+  "err.unreachable": "A TV está inacessível.", "err.wrong_code": "Código errado: veja o novo código na TV.",
+  "err.pairing_expired": "Emparelhamento expirado: tente de novo.",
+
+  "settings.title": "Definições", "settings.language": "Idioma", "settings.langAuto": "Automático (idioma do telemóvel)",
+  "settings.siri": "Siri e Atalhos",
+  "settings.siriHint": "Em <b>Atalhos</b> escolha <b>Obter conteúdo do URL</b>, cole o endereço e dê ao atalho a frase que vai dizer à Siri. Só funciona no seu Wi-Fi de casa.",
+  "settings.usage": "Utilização", "settings.oneHand": "Modo de uma mão", "settings.haptic": "Vibração nas teclas",
+  "settings.hapticHint": "A vibração só funciona no Android: o iPhone não a permite às apps web.",
+  "settings.advanced": "Avançadas", "settings.bridge": "Endereço do recetor", "settings.bridgePh": "Vazio = automático",
+  "settings.saveBridge": "Guardar e ligar", "settings.footer": "GlassRemote v0.3 · sem publicidade",
+
+  "siri.noBridge": "Abra a app a partir do endereço do recetor para ver os endereços.", "siri.on": "Ligar a TV",
+  "siri.off": "Desligar a TV", "siri.mute": "Silêncio", "siri.sleep30": "Desligar daqui a 30 minutos",
+  "siri.scene": "Cena {name}", "siri.copy": "Copiar", "siri.copyAria": "Copiar o endereço: {name}",
+  "siri.copied": "Endereço copiado.", "siri.prompt": "Copie este endereço:",
+
+  "detail.aria": "Detalhes da TV", "detail.close": "Fechar", "detail.rename": "Mudar o nome", "detail.copyIp": "Copiar endereço IP",
+  "detail.favorite": "Favorita", "detail.remove": "Eliminar a TV", "detail.confirm": "Confirmar",
+  "detail.confirmAria": "Confirmar a eliminação", "detail.toggle": "Ligar ou desligar", "detail.use": "Usar como comando",
+  "detail.cannotRead": "Não consigo ler os dados da TV.",
+  "detail.cannotReadHint": "Verifique se o recetor está ligado e se a TV está na mesma rede.",
+  "detail.status": "Estado", "detail.link": "Ligação", "detail.power": "Alimentação", "detail.runningApp": "App em uso",
+  "detail.muted": "silenciada", "detail.latency": "Tempo de resposta", "detail.device": "Dispositivo", "detail.maker": "Fabricante",
+  "detail.model": "Modelo", "detail.uptime": "Ligada há", "detail.tech": "Detalhes técnicos", "detail.mac": "Endereço MAC",
+  "detail.connType": "Rede", "detail.ports": "Portas abertas", "detail.sw": "Software", "detail.cast": "Firmware Cast",
+  "detail.locale": "Idioma", "detail.updates": "Atualizações", "detail.avail": "Disponível", "detail.none": "Nenhuma",
+  "detail.udn": "ID do dispositivo",
+  "detail.note": "Dados lidos da sua rede doméstica. A app só envia comandos: não lê o ecrã, os ficheiros nem os conteúdos da TV.",
+  "detail.nameAria": "Nome da TV", "detail.saveName": "Guardar o nome", "detail.more": "Mais ações",
+  "detail.deleted": "TV eliminada. Volta a encontrá-la com “Procurar TV na rede”.",
+  "detail.ipCopied": "Endereço IP copiado.",
+  "port.6466": "Controlo remoto", "port.6467": "Emparelhamento", "port.8008": "Cast (HTTP)", "port.8009": "Cast (TLS)", "port.8443": "Cast (configuração)",
+  "up.days": "{d} dias {h} h", "up.hours": "{h} h {m} min", "up.min": "{m} min",
+
+  "sys.screensaver": "Proteção de ecrã", "sys.home": "Ecrã inicial", "sys.settings": "Definições da TV", "sys.playStore": "Play Store",
+};

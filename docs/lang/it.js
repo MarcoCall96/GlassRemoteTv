@@ -1,0 +1,121 @@
+(window.I18N = window.I18N || {}).it = {
+  "c.edit": "Modifica", "c.done": "Fine", "c.cancel": "Annulla", "c.save": "Salva", "c.add": "Aggiungi",
+  "c.retry": "Riprova", "c.connect": "Collega TV", "c.switchTv": "Cambia TV", "c.mute": "Muto",
+
+  "nav.sections": "Sezioni", "nav.tv": "TV", "nav.remote": "Telecomando", "nav.apps": "App", "nav.settings": "Impostazioni",
+
+  "tv.title": "Le mie TV", "tv.addAria": "Aggiungi TV", "tv.all": "Tutte le TV", "tv.filter": "Filtro TV",
+  "tv.favorites": "Preferite", "tv.allShort": "Tutte", "tv.hint": "Tocca una TV per vederne i dettagli.",
+  "tv.scan": "Cerca TV sulla rete", "tv.selected": "Selezionata", "tv.details": "Dettagli di {name}",
+  "tv.unfav": "Togli dai preferiti: {name}", "tv.fav": "Aggiungi ai preferiti: {name}", "tv.link": "Collega {name}",
+  "tv.noFav": "Nessuna preferita. Tocca la stella su una TV per aggiungerla.", "tv.addCard": "Aggiungi TV", "tv.none": "Nessuna TV",
+
+  "status.bridgeOff": "Ricevitore spento", "status.linked": "Collegata", "status.pairing": "Da abbinare",
+  "status.noReply": "Non risponde", "status.connecting": "Collego…", "status.off": "Scollegata",
+
+  "hero.noTv": "Nessuna TV", "hero.noTvHint": "Aggiungi la tua prima TV per iniziare.", "hero.standby": "In standby", "hero.on": "Accesa",
+  "hero.turnOff": "Spegni {name}", "hero.turnOn": "Accendi {name}", "hero.now": "Ora sulla TV",
+  "hero.open": "Apri il telecomando", "hero.retry": "Ricevitore spento · Riprova", "hero.connecting": "Collegamento in corso…",
+  "hero.wakeToast": "Provo ad accendere la TV…",
+
+  "scenes.title": "Scene", "scenes.one": "Scena", "scenes.new": "Nuova scena", "scenes.edit": "Modifica scena",
+  "scenes.editAria": "Modifica la scena {name}", "scenes.startAria": "Avvia la scena {name}", "scenes.noAction": "Nessuna azione",
+  "scenes.vol": "Vol {n}", "scenes.min": "{n} min", "scenes.timer": "Timer", "scenes.timerLeft": "Spegne tra {n} min",
+  "scenes.timerIdle": "Spegni la TV", "scenes.icon": "Icona", "scenes.color": "Colore", "scenes.does": "Cosa fa",
+  "scenes.openApp": "Apri app", "scenes.never": "Mai", "scenes.min15": "15 minuti", "scenes.min30": "30 minuti",
+  "scenes.hour1": "1 ora", "scenes.hour15": "1,5 ore", "scenes.turnOffAfter": "Spegni dopo",
+  "scenes.delete": "Elimina scena", "scenes.noApp": "Nessuna app", "scenes.dontChange": "Non cambiare",
+  "scenes.nameFirst": "Dai un nome alla scena.", "scenes.saved": "Scena {name} salvata.", "scenes.deleted": "Scena eliminata.",
+  "scenes.saveFail": "Ricevitore non raggiungibile: scena non salvata.", "scenes.running": "Scena {name} in corso…",
+  "scenes.cinema": "Cinema", "scenes.night": "Notte", "scenes.slug": "scena",
+
+  "toast.connectFirst": "Collega prima la TV.", "toast.notLinked": "La TV non è collegata.",
+  "toast.retryBridge": "Riprovo a collegarmi al ricevitore…",
+
+  "timer.aria": "Timer di spegnimento", "timer.title": "Spegni la TV tra", "timer.minutes": "minuti", "timer.hour": "ora",
+  "timer.hours": "ore", "timer.oneHalf": "1,5", "timer.cancel": "annulla",
+  "timer.left": "La TV si spegnerà tra {n} min.", "timer.idle": "La TV passa in standby all'ora scelta.",
+  "timer.set": "La TV si spegnerà tra {n} min.", "timer.canceled": "Timer annullato.",
+
+  "add.title": "Aggiungi una TV", "add.name": "Nome", "add.namePh": "TV della camera", "add.ip": "Indirizzo IP",
+  "add.ipPh": "Indirizzo della TV", "add.defaultName": "Nuova TV", "brand.ready": "disponibile", "brand.soon": "in arrivo",
+
+  "pair.title": "Abbina la TV", "pair.hint": "Sulla TV è comparso un codice di 6 caratteri. Scrivilo qui sotto: serve una volta sola.",
+  "pair.codeAria": "Codice mostrato sulla TV", "pair.button": "Abbina",
+
+  "switch.selected": "TV selezionata: {name}", "switch.add": "Aggiungi TV…",
+  "shortcut.title": "Nuova scorciatoia", "shortcut.package": "Pacchetto",
+
+  "remote.title": "Telecomando", "remote.power": "Accendi o spegni la TV", "remote.input": "Cambia ingresso",
+  "remote.back": "Indietro", "remote.home": "Home", "remote.menu": "Menu", "remote.rewind": "Indietro veloce",
+  "remote.playPause": "Play e pausa", "remote.forward": "Avanti veloce", "remote.volume": "Volume",
+  "remote.volUp": "Volume più", "remote.volDown": "Volume meno", "remote.volShort": "Vol", "remote.guide": "Guida",
+  "remote.exit": "Esci", "remote.channel": "Canale", "remote.chUp": "Canale più", "remote.chDown": "Canale meno",
+  "remote.chShort": "Ch", "remote.dpad": "Frecce di navigazione", "remote.up": "Su", "remote.left": "Sinistra",
+  "remote.right": "Destra", "remote.down": "Giù", "remote.touchAria": "Touchpad: scorri per muoverti, tocca per OK",
+  "remote.touchHint": "Scorri per muoverti", "remote.touchTap": "Tocca per OK", "remote.delete": "Cancella",
+  "remote.enterAria": "Invio", "remote.kbPlaceholder": "Tocca per scrivere o dettare…", "remote.kbAria": "Testo da inviare alla TV",
+  "remote.paste": "Incolla dagli appunti", "remote.mode": "Modalità del telecomando", "remote.modeDpad": "Frecce",
+  "remote.modeTouch": "Touch", "remote.modeNumbers": "Numeri", "remote.modeKeyboard": "Tastiera",
+
+  "off.disc": "TV scollegata", "off.discSub": "Collega la TV per usare il telecomando.",
+  "off.noBridge": "Ricevitore non raggiungibile", "off.noBridgeSub": "Accendi il ricevitore sul computer, sulla stessa rete Wi-Fi, e riprova.",
+  "off.waitCode": "In attesa del codice", "off.waitCodeSub": "Scrivi il codice mostrato sulla TV.",
+  "off.noReply": "La TV non risponde", "off.connecting": "Collegamento in corso…", "off.connectingSub": "Attendo la risposta della TV.",
+
+  "apps.title": "App", "apps.recents": "Recenti", "apps.all": "Tutte le app",
+  "apps.hint": "Tocca un'app per aprirla subito sulla TV.",
+  "apps.hintEdit": "Tocca − per togliere un'app dall'elenco. Con Aggiungi crei una scorciatoia.",
+  "apps.remove": "Elimina {name}", "apps.hide": "Nascondi {name}", "apps.addAria": "Aggiungi scorciatoia",
+  "apps.restore": "Mostra di nuovo le app nascoste ({n})", "apps.opening": "Apro {name}…",
+  "apps.needFields": "Scrivi nome e pacchetto.",
+
+  "kb.shift": "Maiuscole", "kb.symbols": "Simboli", "kb.space": "spazio", "kb.enter": "Invio",
+  "kb.empty": "Gli appunti sono vuoti.", "kb.pasteFail": "Non posso leggere gli appunti: tocca il campo e incolla.",
+
+  "scan.noBridge": "Nessun ricevitore collegato: l'app è in modalità dimostrativa.", "scan.searching": "Cerco TV sulla rete Wi-Fi…",
+  "scan.found.one": "{n} TV controllabile sulla rete", "scan.found.other": "{n} TV controllabili sulla rete",
+  "scan.newN.one": "{n} nuova", "scan.newN.other": "{n} nuove", "scan.unsupported": "{n} non ancora supportate.",
+  "scan.onlyUnsupported.one": "Trovata {n} TV, ma non ancora supportata.",
+  "scan.onlyUnsupported.other": "Trovate {n} TV, ma non ancora supportate.",
+  "scan.nothing": "Nessuna TV trovata sulla rete.", "scan.unreachable": "Ricevitore non raggiungibile: controlla che sia acceso.",
+
+  "conn.waiting": "Ricevitore: in attesa…", "conn.ok": "Ricevitore raggiungibile.", "conn.ko": "Ricevitore non raggiungibile.",
+  "conn.none": "Nessun ricevitore collegato.",
+
+  "err.unreachable": "La TV non è raggiungibile.", "err.wrong_code": "Codice errato: guarda il nuovo codice sulla TV.",
+  "err.pairing_expired": "Abbinamento scaduto: riprova.",
+
+  "settings.title": "Impostazioni", "settings.language": "Lingua", "settings.langAuto": "Automatica (lingua del telefono)",
+  "settings.siri": "Siri e Comandi Rapidi",
+  "settings.siriHint": "In <b>Comandi Rapidi</b> scegli <b>Ottieni contenuti dell'URL</b>, incolla l'indirizzo e dai al comando il nome da dire a Siri. Funziona solo sul tuo Wi-Fi di casa.",
+  "settings.usage": "Uso", "settings.oneHand": "Modalità a una mano", "settings.haptic": "Vibrazione ai tasti",
+  "settings.hapticHint": "La vibrazione funziona solo su Android: iPhone non la consente alle web app.",
+  "settings.advanced": "Avanzate", "settings.bridge": "Indirizzo del ricevitore", "settings.bridgePh": "Vuoto = automatico",
+  "settings.saveBridge": "Salva e collega", "settings.footer": "GlassRemote v0.3 · senza pubblicità",
+
+  "siri.noBridge": "Apri l'app dall'indirizzo del ricevitore per vedere gli indirizzi.", "siri.on": "Accendi la TV",
+  "siri.off": "Spegni la TV", "siri.mute": "Muto", "siri.sleep30": "Spegni tra 30 minuti",
+  "siri.scene": "Scena {name}", "siri.copy": "Copia", "siri.copyAria": "Copia l'indirizzo: {name}",
+  "siri.copied": "Indirizzo copiato.", "siri.prompt": "Copia questo indirizzo:",
+
+  "detail.aria": "Dettagli TV", "detail.close": "Chiudi", "detail.rename": "Rinomina", "detail.copyIp": "Copia indirizzo IP",
+  "detail.favorite": "Preferita", "detail.remove": "Elimina la TV", "detail.confirm": "Conferma",
+  "detail.confirmAria": "Conferma l'eliminazione", "detail.toggle": "Collega o scollega", "detail.use": "Usa come telecomando",
+  "detail.cannotRead": "Non riesco a leggere i dati della TV.",
+  "detail.cannotReadHint": "Controlla che il ricevitore sia acceso e che la TV sia sulla stessa rete.",
+  "detail.status": "Stato", "detail.link": "Collegamento", "detail.power": "Accensione", "detail.runningApp": "App in uso",
+  "detail.muted": "muto", "detail.latency": "Tempo di risposta", "detail.device": "Dispositivo", "detail.maker": "Produttore",
+  "detail.model": "Modello", "detail.uptime": "Acceso da", "detail.tech": "Dettagli tecnici", "detail.mac": "Indirizzo MAC",
+  "detail.connType": "Connessione", "detail.ports": "Porte aperte", "detail.sw": "Software", "detail.cast": "Firmware Cast",
+  "detail.locale": "Lingua", "detail.updates": "Aggiornamenti", "detail.avail": "Disponibile", "detail.none": "Nessuno",
+  "detail.udn": "ID dispositivo",
+  "detail.note": "Dati letti dalla rete di casa. L'app invia solo comandi: non legge schermo, file o contenuti della TV.",
+  "detail.nameAria": "Nome della TV", "detail.saveName": "Salva il nome", "detail.more": "Altre azioni",
+  "detail.deleted": "TV eliminata. La ritrovi con “Cerca TV sulla rete”.",
+  "detail.ipCopied": "Indirizzo IP copiato.",
+  "port.6466": "Controllo remoto", "port.6467": "Abbinamento", "port.8008": "Cast (HTTP)", "port.8009": "Cast (TLS)", "port.8443": "Cast (setup)",
+  "up.days": "{d} giorni {h} h", "up.hours": "{h} h {m} min", "up.min": "{m} min",
+
+  "sys.screensaver": "Salvaschermo", "sys.home": "Schermata Home", "sys.settings": "Impostazioni TV", "sys.playStore": "Play Store",
+};
