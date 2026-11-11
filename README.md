@@ -13,6 +13,8 @@
 
 </div>
 
+<p align="center"><img src="docs/assets/screenshots/preview.png" alt="GlassRemote preview: TVs, remote and apps" width="900" /></p>
+
 ---
 
 ## Why this exists

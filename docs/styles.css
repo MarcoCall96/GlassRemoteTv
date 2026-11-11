@@ -187,6 +187,7 @@ h2.hero-name { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: -.0
 .row .link { min-height: 0; padding: 0; }
 .row.item { min-height: 54px; }
 .row .rt { color: var(--muted); font-size: 14px; }
+.row > .hint:only-child { flex: 1; white-space: normal; line-height: 1.4; padding: 14px 0; }
 .lang-row { cursor: pointer; }
 .lang-row .lang-cur { display: flex; align-items: center; gap: 6px; color: var(--accent); font-size: 16px; }
 .lang-row .lang-cur b { font-weight: 500; }

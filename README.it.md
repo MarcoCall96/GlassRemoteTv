@@ -11,6 +11,8 @@
 
 </div>
 
+<p align="center"><img src="docs/assets/screenshots/preview.png" alt="Anteprima di GlassRemote: TV, telecomando e app" width="900" /></p>
+
 ---
 
 ## Perché
