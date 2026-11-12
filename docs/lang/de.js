@@ -93,7 +93,7 @@
   "settings.usage": "Nutzung", "settings.oneHand": "Einhandmodus", "settings.haptic": "Vibration bei Tasten",
   "settings.hapticHint": "Vibration funktioniert nur unter Android: Das iPhone erlaubt sie Web-Apps nicht.",
   "settings.advanced": "Erweitert", "settings.bridge": "Adresse des Empfängers", "settings.bridgePh": "Leer = automatisch",
-  "settings.saveBridge": "Sichern und verbinden", "settings.footer": "GlassRemote v0.3 · ohne Werbung",
+  "settings.saveBridge": "Sichern und verbinden", "settings.footer": "GlassRemote v0.4 · ohne Werbung",
 
   "siri.noBridge": "Öffne die App über die Adresse des Empfängers, um die Adressen zu sehen.", "siri.on": "TV einschalten",
   "siri.off": "TV ausschalten", "siri.mute": "Stumm", "siri.sleep30": "In 30 Minuten ausschalten",
