@@ -13,7 +13,11 @@
 
 </div>
 
+<p align="center"><img src="docs/assets/screenshots/demo.gif" alt="GlassRemote demo: open a link on the TV, TV health, what is using the CPU, automatic restart" width="300" /></p>
+
 <p align="center"><img src="docs/assets/screenshots/preview.png" alt="GlassRemote preview: TVs, remote and apps" width="900" /></p>
+
+<p align="center"><b>New in 0.5.0:</b> open a link on the TV, a health screen that shows what is using the CPU and memory, one-tap cache cleaning and an optional automatic restart.<br /><img src="docs/assets/screenshots/features.png" alt="New in 0.5.0: open a link on the TV, TV health, what is using the CPU, automatic restart" width="900" /></p>
 
 ---
 
@@ -39,8 +43,20 @@ GlassRemote is a small, fast, open-source web app that does one thing: **control
 | Many TVs | Favorites, quick TV switcher, automatic TV discovery |
 | Siri / Shortcuts | Control the TV by voice through iOS Shortcuts |
 | One-handed mode | Reachable layout for big phones |
+| TV health | CPU, memory and running apps at a glance, a "Clean cache" button and an optional automatic restart (TV app only) |
+| Fast keys | About 10 ms from tap to key on the TV app (it was about 1 s) |
+| Open a link | Paste a YouTube or web link and open it on the TV (TV app only) |
 | Languages | Italiano, English, Español, Français, Deutsch, Português. Automatic or chosen in Settings |
 | Offline | The interface opens even with no connection |
+
+## What's new in 0.5.0 (TV app) / 0.8.1 (web app)
+
+- Keys are about 100 times faster on the TV app: a small helper inside the APK presses them in about 10 ms instead of about 1000 ms.
+- New **Open a link on the TV** card on the Apps screen: paste a YouTube or web link and the TV wakes up and opens it in the app that handles it (TV app only).
+- New **TV health** screen (Settings > TV health): CPU, memory, a plain-language verdict, a Processes list, and which apps use the CPU or memory.
+- **Clean cache** button and an optional **automatic restart** (off by default, only when the TV is in standby).
+- Snappier animations, and a safer "open a link or app on the TV" (http/https links only).
+- Health, cache and restart exist only in the TV app, not in the computer receiver. Details: [AppTv/guide/05-health-and-maintenance.md](AppTv/guide/05-health-and-maintenance.md).
 
 ## How it works (the honest version)
 
@@ -70,7 +86,7 @@ So GlassRemote needs a small **receiver** that sits between the phone and the TV
 
 > The ready-to-install release lives in the [`AppTv/`](AppTv/README.md) folder of this repository: the signed APK (`AppTv/release/`), its checksum, step-by-step install guides and instructions for an AI assistant. The rest of the repository holds the web app, the demo, the computer receiver and the TV app sources.
 
-1. Download **GlassRemoteTv-x.y.z.apk** from the [Releases](https://github.com/MarcoCall96/GlassRemoteTv/releases) page (the same file and its `SHA256SUMS.txt` are in [AppTv/release/](AppTv/release/)) and install it on the TV (for example with the *Downloader* app, or `adb install`). Step by step: [AppTv/guide/01-install-on-your-tv.md](AppTv/guide/01-install-on-your-tv.md).
+1. Download **GlassRemoteTv-0.5.0.apk** from the [Releases](https://github.com/MarcoCall96/GlassRemoteTv/releases) page (the same file and its `SHA256SUMS.txt` are in [AppTv/release/](AppTv/release/)) and install it on the TV (for example with the *Downloader* app, or `adb install`). Step by step: [AppTv/guide/01-install-on-your-tv.md](AppTv/guide/01-install-on-your-tv.md).
 2. On the TV turn on **network debugging**: Settings > Device Preferences > About > tap **Build** seven times > back > Developer options (full steps in the guide of step 1). Open **GlassRemoteTv** from the TV apps. When the TV asks *Allow USB debugging?*, tick **Always allow from this computer**, then press **Allow**.
 3. The TV shows a **QR code** and a **PIN**. Scan the code with your phone camera: the app opens and unlocks by itself.
 4. **iPhone:** Safari, Share, *Add to Home Screen* (type the PIN once more in the installed app). **Android:** Chrome menu, *Install app*.
@@ -102,8 +118,16 @@ Need more help? [Step-by-step guide](guide/01-install-on-your-phone.md) · [Rece
 
 ## Which TVs work?
 
-Any TV that runs **Android TV or Google TV** (Sony, Philips, TCL, Hisense, Xiaomi, Panasonic, Sharp, Nvidia Shield, Chromecast with Google TV and more).
-Samsung (Tizen), LG (webOS), Roku and Fire TV are **not supported yet**. Full list: [guide/03-compatible-tvs.md](guide/03-compatible-tvs.md).
+**Android TV and Google TV. Tested on Android 10 only: see [Tested TVs](AppTv/guide/06-tested-tvs.md).** The TV app needs *Network debugging* in the TV's Developer options; many recent TVs (Android 11 and newer) offer only *Wireless debugging*, which is untested here and may not work. The receiver also works with TVs that expose the Android TV Remote service (Sony, Philips, TCL, Hisense, Xiaomi, Panasonic, Sharp, Nvidia Shield, Chromecast with Google TV and more): full list in [guide/03-compatible-tvs.md](guide/03-compatible-tvs.md).
+Samsung (Tizen), LG (webOS), Roku, Fire TV and Apple TV are **not supported**.
+
+| TV | Android | Result |
+|---|---|---|
+| Panasonic 4KTV-JUP (Google TV) | 10 | Everything checked works (install, keys, volume, apps, wake, link, TV health, restart) |
+| Your TV here | ? | Waiting for reports |
+| Your TV here | ? | Waiting for reports |
+
+**Tried it on your TV?** [Report it](https://github.com/MarcoCall96/GlassRemoteTv/issues/new?template=tv-report.yml): it will be added to the table.
 
 ## Let an AI assistant do the setup for you
 

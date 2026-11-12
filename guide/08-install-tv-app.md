@@ -10,3 +10,5 @@ The full, step-by-step guide to install the GlassRemoteTv app on your Android TV
 4. **Open the app on the TV**, tick *Always allow from this computer* and press *Allow* once, then scan the QR code with your phone (keep the app open on the TV: the PIN is shown there).
 
 Everything about the TV release (security, troubleshooting, building it yourself) is in [AppTv/README.md](../AppTv/README.md).
+
+New in TV app 0.5.0: much faster keys, an **Open a link on the TV** card, a TV health screen (CPU, memory, processes), a "Clean cache" button and an optional automatic restart, see [AppTv/guide/05-health-and-maintenance.md](../AppTv/guide/05-health-and-maintenance.md).

@@ -42,4 +42,4 @@ The receiver already recognises Samsung, LG and Roku during discovery and labels
 
 ## Tested
 
-The project was developed and tested on an Android TV 11 set. **Please test yours and open an issue** with brand, model, Android TV version and what worked: wake, volume, app launch, keyboard, voice dictation. That list will grow here.
+The project was developed and tested on a Panasonic Android TV set (Android 10). **Please test yours and open an issue** with brand, model, Android TV version and what worked: wake, volume, app launch, keyboard, voice dictation. That list will grow here. For the TV app, see [Tested TVs](../AppTv/guide/06-tested-tvs.md).

@@ -10,3 +10,5 @@ La guida completa, passo passo, per installare l'app GlassRemoteTv sulla tua And
 4. **Apri l'app sulla TV**, spunta *Consenti sempre da questo computer* e premi *Consenti* una volta, poi inquadra il codice QR con il telefono (tieni l'app aperta sulla TV: il PIN è mostrato lì).
 
 Tutto sulla release per la TV (sicurezza, problemi comuni, compilarla da te) è in [AppTv/README.it.md](../../AppTv/README.it.md).
+
+Novità dell'app TV 0.5.0: tasti molto più veloci, una scheda **Apri un link sulla TV**, il Cruscotto TV (CPU, memoria, processi), un pulsante "Pulisci la cache" e un riavvio automatico facoltativo, vedi [AppTv/guide/it/05-salute-e-manutenzione.md](../../AppTv/guide/it/05-salute-e-manutenzione.md).

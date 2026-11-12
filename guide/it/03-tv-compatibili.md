@@ -42,4 +42,4 @@ Il ricevitore riconosce già Samsung, LG e Roku durante la ricerca e le segnala 
 
 ## Provate
 
-Il progetto è stato sviluppato e provato su una TV con Android TV 11. **Prova la tua e apri una issue** con marchio, modello, versione di Android TV e cosa ha funzionato: accensione, volume, apertura app, tastiera, dettatura. L'elenco crescerà qui.
+Il progetto è stato sviluppato e provato su una TV Panasonic con Android TV (Android 10). **Prova la tua e apri una issue** con marchio, modello, versione di Android TV e cosa ha funzionato: accensione, volume, apertura app, tastiera, dettatura. L'elenco crescerà qui. Per l'app TV vedi [TV testate](../../AppTv/guide/it/06-tv-testate.md).

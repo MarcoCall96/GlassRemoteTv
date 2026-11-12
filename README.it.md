@@ -13,7 +13,11 @@
 
 </div>
 
+<p align="center"><img src="docs/assets/screenshots/demo.it.gif" alt="Demo di GlassRemote: apri un link sulla TV, Cruscotto TV, cosa usa la CPU, riavvio automatico" width="300" /></p>
+
 <p align="center"><img src="docs/assets/screenshots/preview.png" alt="Anteprima di GlassRemote: TV, telecomando e app" width="900" /></p>
+
+<p align="center"><b>Novità della 0.5.0:</b> apri un link sulla TV, un cruscotto che mostra cosa usa CPU e memoria, pulizia della cache con un tocco e riavvio automatico facoltativo.<br /><img src="docs/assets/screenshots/features.it.png" alt="Novità della 0.5.0: apri un link sulla TV, Cruscotto TV, cosa usa la CPU, riavvio automatico" width="900" /></p>
 
 ---
 
@@ -28,7 +32,16 @@ GlassRemote è una web app (PWA) piccola, veloce e open source, in stile **Liqui
 
 ## Funzioni
 
-Frecce, touchpad, tastierino numerico, tastiera con dettatura e incolla, app con icone ufficiali, **scene** (app + volume + timer in un tocco), **timer di spegnimento**, più TV con preferite, ricerca automatica delle TV, **Siri e Comandi Rapidi**, modalità a una mano, interfaccia che si apre anche senza connessione, **6 lingue** (Italiano, English, Español, Français, Deutsch, Português) da scegliere in Impostazioni.
+Frecce, touchpad, tastierino numerico, tastiera con dettatura e incolla, app con icone ufficiali, **scene** (app + volume + timer in un tocco), **timer di spegnimento**, più TV con preferite, ricerca automatica delle TV, **Siri e Comandi Rapidi**, modalità a una mano, interfaccia che si apre anche senza connessione, **6 lingue** (Italiano, English, Español, Français, Deutsch, Português) da scegliere in Impostazioni. Con l'app TV in più: **tasti veloci** (circa 10 ms dal tocco al tasto sulla TV, prima circa 1 s) e il **Cruscotto TV** con CPU, memoria, pulizia della cache e riavvio automatico facoltativo, più **Apri un link sulla TV** (incolli un link di YouTube o del web e lo apri sulla TV).
+
+## Novità della 0.5.0 (app TV) / 0.8.1 (app web)
+
+- I tasti sono circa 100 volte più veloci con l'app TV: un piccolo aiutante dentro l'APK li preme in circa 10 ms invece di circa 1000 ms.
+- Nuova scheda **Apri un link sulla TV** nella schermata App: incolla un link di YouTube o del web e la TV si sveglia e lo apre nell'app che lo gestisce (solo app TV).
+- Nuova schermata **Cruscotto TV** (Impostazioni > Cruscotto TV): CPU, memoria, un giudizio in parole semplici, un elenco Processi e quali app usano CPU o memoria.
+- Pulsante **Pulisci la cache** e **riavvio automatico** facoltativo (spento di default, solo quando la TV è in standby).
+- Animazioni più rapide e "apri un link o un'app sulla TV" più sicuro (solo link http/https).
+- Cruscotto, cache e riavvio esistono solo nell'app TV, non nel ricevitore per computer. Dettagli: [AppTv/guide/it/05-salute-e-manutenzione.md](AppTv/guide/it/05-salute-e-manutenzione.md).
 
 ## Come funziona (onestamente)
 
@@ -56,7 +69,7 @@ Servono: una **Android TV / Google TV** sul Wi-Fi di casa e un telefono (iPhone 
 
 > La versione pronta da installare sta nella cartella [`AppTv/`](AppTv/README.it.md) di questo repository: l'APK firmata (`AppTv/release/`), la somma di controllo, le guide di installazione passo passo e le istruzioni per un assistente AI. Il resto del repository contiene l'app web, la demo, il ricevitore per computer e i sorgenti dell'app TV.
 
-1. Scarica **GlassRemoteTv-x.y.z.apk** dalla pagina [Releases](https://github.com/MarcoCall96/GlassRemoteTv/releases) (lo stesso file e il suo `SHA256SUMS.txt` sono in [AppTv/release/](AppTv/release/)) e installala sulla TV (per esempio con l'app *Downloader* o con `adb install`). Passo passo: [AppTv/guide/it/01-installare-sulla-tua-tv.md](AppTv/guide/it/01-installare-sulla-tua-tv.md).
+1. Scarica **GlassRemoteTv-0.5.0.apk** dalla pagina [Releases](https://github.com/MarcoCall96/GlassRemoteTv/releases) (lo stesso file e il suo `SHA256SUMS.txt` sono in [AppTv/release/](AppTv/release/)) e installala sulla TV (per esempio con l'app *Downloader* o con `adb install`). Passo passo: [AppTv/guide/it/01-installare-sulla-tua-tv.md](AppTv/guide/it/01-installare-sulla-tua-tv.md).
 2. Sulla TV attiva il **debug di rete**: Impostazioni > Preferenze dispositivo > Informazioni > tocca sette volte **Build** > indietro > Opzioni sviluppatore (passi completi nella guida del punto 1). Apri **GlassRemoteTv** dalle app della TV. Quando la TV chiede *Consentire il debug USB?*, spunta **Consenti sempre da questo computer**, poi premi **Consenti**.
 3. La TV mostra un **codice QR** e un **PIN**. Inquadra il codice con la fotocamera del telefono: l'app si apre e si sblocca da sola.
 4. **iPhone:** Safari, Condividi, **Aggiungi alla schermata Home** (nell'app installata scrivi il PIN una volta). **Android:** menu di Chrome, **Installa app**.
@@ -88,8 +101,16 @@ Guide: [installazione sul telefono](guide/it/01-installare-sul-telefono.md) · [
 
 ## Quali TV funzionano?
 
-Tutte le TV con **Android TV o Google TV** (Sony, Philips, TCL, Hisense, Xiaomi, Panasonic, Sharp, Nvidia Shield, Chromecast con Google TV...).
-Samsung (Tizen), LG (webOS), Roku e Fire TV **non sono ancora supportate**. Elenco completo: [guide/it/03-tv-compatibili.md](guide/it/03-tv-compatibili.md).
+**Android TV e Google TV. Provata solo su Android 10: vedi [TV testate](AppTv/guide/it/06-tv-testate.md).** L'app TV richiede il *Debug di rete* nelle Opzioni sviluppatore della TV; molte TV recenti (Android 11 e successive) offrono solo il *Debug wireless*, che qui non è stato provato e potrebbe non funzionare. Il ricevitore funziona anche con le TV che espongono il servizio Android TV Remote (Sony, Philips, TCL, Hisense, Xiaomi, Panasonic, Sharp, Nvidia Shield, Chromecast con Google TV...): elenco completo in [guide/it/03-tv-compatibili.md](guide/it/03-tv-compatibili.md).
+Samsung (Tizen), LG (webOS), Roku, Fire TV e Apple TV **non sono supportate**.
+
+| TV | Android | Risultato |
+|---|---|---|
+| Panasonic 4KTV-JUP (Google TV) | 10 | Tutto ciò che è stato controllato funziona (installazione, tasti, volume, app, accensione, link, Cruscotto TV, riavvio) |
+| La tua TV qui | ? | In attesa di segnalazioni |
+| La tua TV qui | ? | In attesa di segnalazioni |
+
+**L'hai provata sulla tua TV?** [Segnalala](https://github.com/MarcoCall96/GlassRemoteTv/issues/new?template=tv-report.yml): verrà aggiunta alla tabella.
 
 ## Fatti aiutare da un assistente AI
 
