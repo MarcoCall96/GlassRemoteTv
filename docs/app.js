@@ -5,6 +5,18 @@ const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 if (new URLSearchParams(location.search).has("mock")) document.documentElement.classList.add("mock");
 
+/* iOS sometimes opens a Home Screen app in a window shorter than the screen (blank band at the bottom): fill the real screen */
+if (navigator.standalone === true) {
+  const fit = () => {
+    const full = Math.max(screen.width, screen.height), gap = full - innerHeight;
+    if (innerHeight > innerWidth && gap > 8 && gap < 120) document.documentElement.style.setProperty("--app-height", full + "px");
+    else document.documentElement.style.removeProperty("--app-height");
+  };
+  fit();
+  for (const ev of ["resize", "orientationchange", "pageshow"]) addEventListener(ev, () => setTimeout(fit, 60));
+  document.addEventListener("visibilitychange", () => setTimeout(fit, 60));
+}
+
 /* img = official icon in assets/apps (falls back to a Simple Icons logo or initials); bg/fg = fallback colors */
 const APPS = [
   { name: "YouTube", img: "youtube", logo: "youtube", bg: "#ffffff", fg: "#ff0000", pkg: "com.google.android.youtube.tv" },
@@ -1085,7 +1097,7 @@ function layoutReport() {
     if (++taps < 5) return;
     taps = 0;
     const r = layoutReport();
-    toast(`${r.nav}/${r.dm} · ${r.proto} · win ${r.win} · screen ${r.screen} · app ${r.app} · safe ${r.safe}`, 12000);
+    toast(`${r.nav}/${r.dm} · ${r.proto} · win ${r.win} · outer ${r.outer} · vv ${r.vv} · screen ${r.screen} · app ${r.app} · safe ${r.safe}`, 12000);
   });
 }
 function paintLang() {
