@@ -37,7 +37,7 @@ Remove-Item "$out\assets\www\.nojekyll", "$out\assets\www\assets\screenshots" -R
 & "$btPath\aapt2.exe" compile --dir "$root\res" -o "$out\res.zip"
 if ($LASTEXITCODE -ne 0) { throw "aapt2 compile failed" }
 & "$btPath\aapt2.exe" link -o "$out\base.apk" -I $androidJar --manifest "$root\AndroidManifest.xml" `
-    --min-sdk-version 21 --target-sdk-version 29 --version-code 4 --version-name 0.4.0 -A "$out\assets" "$out\res.zip"
+    --min-sdk-version 21 --target-sdk-version 29 --version-code 5 --version-name 0.4.1 -A "$out\assets" "$out\res.zip"
 if ($LASTEXITCODE -ne 0) { throw "aapt2 link failed" }
 
 # 3. Java -> classes -> dex
