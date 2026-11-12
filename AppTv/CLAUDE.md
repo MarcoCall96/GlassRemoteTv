@@ -30,7 +30,7 @@ Be warm, concrete and brief. One step at a time. Confirm each step worked before
 Phone (web app)  --Wi-Fi-->  GlassRemoteTv (installed on the TV)  --ADB on loopback-->  the same TV
 ```
 
-- `AppTv/release/GlassRemoteTv-0.4.0.apk` and `AppTv/release/SHA256SUMS.txt`: the signed app and its checksum.
+- `AppTv/release/GlassRemoteTv-0.4.1.apk` and `AppTv/release/SHA256SUMS.txt`: the signed app and its checksum.
 - `AppTv/guide/` (English) and `AppTv/guide/it/` (Italiano): the step-by-step guides.
 - `tv-app/`: the Java app (plain Java, no Gradle), with its build script, tests and tools. The build bundles the phone web app from `docs/` in the APK.
 - It is one repository: the phone web app (`docs/`), the optional computer receiver (`receiver/`) and the TV app sources (`tv-app/`) are at the repository root, next to `AppTv/`.
@@ -57,20 +57,20 @@ Full text for the user: [guide/01-install-on-your-tv.md](guide/01-install-on-you
 
 ### 1. Get and verify the APK
 
-This step applies to the **USB stick** and **adb** methods: download `GlassRemoteTv-0.4.0.apk` from the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases) (the same file is also in `AppTv/release/`), then verify it (see "How to verify the APK" below).
+This step applies to the **USB stick** and **adb** methods: download `GlassRemoteTv-0.4.1.apk` from the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases) (the same file is also in `AppTv/release/`), then verify it (see "How to verify the APK" below).
 **Check:** the SHA-256 matches `AppTv/release/SHA256SUMS.txt`.
 
-**Downloader method:** nothing is downloaded in this step, because the TV cannot check a hash. The TV downloads the file over HTTPS from the official release URL in step 2. You, the AI assistant (you have the repository files), verify the hash of `AppTv/release/GlassRemoteTv-0.4.0.apk` against `AppTv/release/SHA256SUMS.txt` locally, and tell the user that the hash check on the TV is skipped. The Check passes when the user accepts that.
+**Downloader method:** nothing is downloaded in this step, because the TV cannot check a hash. The TV downloads the file over HTTPS from the official release URL in step 2. You, the AI assistant (you have the repository files), verify the hash of `AppTv/release/GlassRemoteTv-0.4.1.apk` against `AppTv/release/SHA256SUMS.txt` locally, and tell the user that the hash check on the TV is skipped. The Check passes when the user accepts that.
 
 ### 2. Install it on the TV
 
 - Downloader (Android TV / Google TV, no computer):
   1. On the TV open the **Google Play Store**, search for **Downloader** (by AFTVnews) and install it.
   2. Open it. At first run it asks for permission to access media/files: choose **Allow**.
-  3. Type the direct link in the URL field, then press **Go**: `https://github.com/MarcoCall96/GlassRemoteTv/releases/download/v0.4.0/GlassRemoteTv-0.4.0.apk` (fallback: `https://github.com/MarcoCall96/GlassRemoteTv/raw/main/AppTv/release/GlassRemoteTv-0.4.0.apk`). Typing a long URL with the TV remote is slow and must be exact: if the user struggles, suggest the shorter alternative, a USB stick or adb.
+  3. Type the direct link in the URL field, then press **Go**: `https://github.com/MarcoCall96/GlassRemoteTv/releases/download/v0.4.1/GlassRemoteTv-0.4.1.apk` (fallback: `https://github.com/MarcoCall96/GlassRemoteTv/raw/main/AppTv/release/GlassRemoteTv-0.4.1.apk`). Typing a long URL with the TV remote is slow and must be exact: if the user struggles, suggest the shorter alternative, a USB stick or adb.
   4. When it downloads, choose **Install**. If the TV blocks it, allow **Install unknown apps** for Downloader: Settings > Device Preferences > Security & restrictions > Unknown sources (menu names vary by TV brand).
 - USB stick: copy the APK, plug it into the TV, open it with a file manager, install.
-- adb: `adb connect 192.168.x.x:5555`, then `adb install GlassRemoteTv-0.4.0.apk` (network debugging must be on first, see step 3).
+- adb: `adb connect 192.168.x.x:5555`, then `adb install GlassRemoteTv-0.4.1.apk` (network debugging must be on first, see step 3).
 
 **Check:** a GlassRemoteTv icon is in the TV apps.
 
@@ -140,9 +140,9 @@ Full list: [guide/03-troubleshooting.md](guide/03-troubleshooting.md).
 
 ## How to verify the APK
 
-1. On Windows: `Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.4.0.apk`. On macOS or Linux: `shasum -a 256 GlassRemoteTv-0.4.0.apk`.
-2. Compare with `AppTv/release/SHA256SUMS.txt`. For 0.4.0 it is `e1425c164a22f62f366f44c15b9afe9dbfb29e4530ee5c070bca1d50a5457963`.
-3. Optional: `apksigner verify --print-certs GlassRemoteTv-0.4.0.apk` (Android build-tools). The certificate subject is `CN=GlassRemoteTv` and its SHA-256 is `62:38:B1:A8:AB:67:23:29:2A:25:60:C9:23:48:8C:82:05:B6:98:1E:61:5F:77:4C:2B:65:44:92:DF:6D:57:07`.
+1. On Windows: `Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.4.1.apk`. On macOS or Linux: `shasum -a 256 GlassRemoteTv-0.4.1.apk`.
+2. Compare with `AppTv/release/SHA256SUMS.txt`. For 0.4.1 it is `d67e6d7af9b4aac38c8aaf5ae1f9e446fd9eee181b652d733f4f9b6099f15c8a`.
+3. Optional: `apksigner verify --print-certs GlassRemoteTv-0.4.1.apk` (Android build-tools). The certificate subject is `CN=GlassRemoteTv` and its SHA-256 is `62:38:B1:A8:AB:67:23:29:2A:25:60:C9:23:48:8C:82:05:B6:98:1E:61:5F:77:4C:2B:65:44:92:DF:6D:57:07`.
 4. If it does not match, **do not install it**. Download it again from the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases).
 5. An APK the user built themselves is signed with their own key, so its fingerprint is different. That is fine.
 

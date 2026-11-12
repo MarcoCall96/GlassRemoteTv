@@ -29,7 +29,7 @@ That is why you do not need a computer, a hub or a second device to keep running
 
 You need an Android TV / Google TV and an iPhone or Android phone, both on the same home Wi-Fi.
 
-1. **Download** `GlassRemoteTv-0.4.0.apk` from the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases). The same file is also committed in this repository as [release/GlassRemoteTv-0.4.0.apk](release/GlassRemoteTv-0.4.0.apk), with its [checksum](release/SHA256SUMS.txt). (With the Downloader app nothing is downloaded now: the TV fetches the file itself in step 2.)
+1. **Download** `GlassRemoteTv-0.4.1.apk` from the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases). The same file is also committed in this repository as [release/GlassRemoteTv-0.4.1.apk](release/GlassRemoteTv-0.4.1.apk), with its [checksum](release/SHA256SUMS.txt). (With the Downloader app nothing is downloaded now: the TV fetches the file itself in step 2.)
 2. **Install it on the TV.** Easiest way: the *Downloader* app on the TV and the direct link to the APK. Other ways (USB stick, adb) are in the [install guide](guide/01-install-on-your-tv.md).
 3. **Turn on network debugging** on the TV: Settings > Device Preferences > About > tap *Build* seven times > back > Developer options, then *USB debugging* and *Network debugging*.
 4. **Open GlassRemoteTv** from the TV apps. When the TV asks *Allow USB debugging?*, tick *Always allow from this computer*, then press *Allow*. You do this once. Keep the app open on the TV: the 6-digit PIN is shown there.
@@ -66,23 +66,23 @@ The app speaks Italiano, English, Español, Français, Deutsch and Português.
 The APK is signed with the maintainer's key (certificate subject `CN=GlassRemoteTv`). Check the checksum against [release/SHA256SUMS.txt](release/SHA256SUMS.txt):
 
 ```powershell
-Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.4.0.apk
+Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.4.1.apk
 ```
 
 ```bash
-shasum -a 256 GlassRemoteTv-0.4.0.apk
+shasum -a 256 GlassRemoteTv-0.4.1.apk
 ```
 
-Expected SHA-256 of the 0.4.0 APK:
+Expected SHA-256 of the 0.4.1 APK:
 
 ```
-e1425c164a22f62f366f44c15b9afe9dbfb29e4530ee5c070bca1d50a5457963
+d67e6d7af9b4aac38c8aaf5ae1f9e446fd9eee181b652d733f4f9b6099f15c8a
 ```
 
 If you have the Android build-tools, you can also check the signature:
 
 ```
-apksigner verify --print-certs GlassRemoteTv-0.4.0.apk
+apksigner verify --print-certs GlassRemoteTv-0.4.1.apk
 ```
 
 The SHA-256 of the signing certificate must be:
