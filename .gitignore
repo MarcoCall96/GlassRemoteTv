@@ -7,5 +7,12 @@ __pycache__/
 *.pem
 *.key
 .env
+*.jks
+*.keystore
+*.p12
+password.txt
+*.apk
+!AppTv/release/*.apk
+build/
 .DS_Store
 Thumbs.db
