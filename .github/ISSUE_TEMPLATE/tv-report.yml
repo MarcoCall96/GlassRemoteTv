@@ -1,0 +1,61 @@
+name: TV report / Segnala la tua TV
+description: Tell us how GlassRemoteTv works on your TV (Dicci come funziona GlassRemoteTv sulla tua TV)
+title: "[TV report] "
+labels: ["tv-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Reports are added to the "Tested TVs" table. Do not post IP addresses, the PIN or other personal data.
+        (Grazie! Le segnalazioni vengono aggiunte alla tabella "TV testate". Non scrivere indirizzi IP, PIN o altri dati personali.)
+  - type: input
+    id: tv
+    attributes:
+      label: TV brand and model (Marca e modello della TV)
+      placeholder: "Brand, model"
+    validations:
+      required: true
+  - type: input
+    id: android
+    attributes:
+      label: Android version (Versione di Android)
+      description: Settings > Device Preferences > About (Impostazioni > Preferenze dispositivo > Informazioni)
+      placeholder: "10"
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result (Risultato)
+      options:
+        - Everything works (Funziona tutto)
+        - Works with problems (Funziona con problemi)
+        - Does not work (Non funziona)
+    validations:
+      required: true
+  - type: checkboxes
+    id: features
+    attributes:
+      label: What worked? Tick what works (Cosa ha funzionato? Spunta ciò che funziona)
+      options:
+        - label: Install (Installazione)
+        - label: QR code and PIN (Codice QR e PIN)
+        - label: Keys (Tasti)
+        - label: Volume
+        - label: Apps (App)
+        - label: Wake from standby (Accensione dallo standby)
+        - label: Open a link (Apri un link)
+        - label: TV health (Cruscotto TV)
+        - label: Clean cache (Pulisci la cache)
+        - label: Automatic restart (Riavvio automatico)
+  - type: textarea
+    id: notes
+    attributes:
+      label: What happened / notes (Cosa è successo / note)
+      description: What did not work, any error shown on the TV, launcher/Home (Google TV or Android TV). Screenshots of the TV screen are welcome. (Cosa non ha funzionato, errori mostrati dalla TV, launcher/Home.)
+  - type: textarea
+    id: version
+    attributes:
+      label: App version (Versione dell'app)
+      description: Shown on the TV and in Settings (Mostrata sulla TV e in Impostazioni)
+      placeholder: "TV app 0.5.0, web app 0.8.1"
