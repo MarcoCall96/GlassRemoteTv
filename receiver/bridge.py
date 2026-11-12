@@ -2,7 +2,8 @@
 
 Usage (from the receiver folder):
     python bridge.py --lan
-Then, from the phone on the same Wi-Fi, open the address printed here (http://<computer-IP>:8780/).
+Then, from the phone on the same Wi-Fi, open the address printed here (http://<computer-IP>:<port>/).
+Each installation picks its own random port the first time and remembers it in bridge-data/port.txt (use --port to force one).
 The app lives in ../docs. The receiver stays on your home network: never open router ports.
 """
 import argparse
@@ -11,6 +12,7 @@ import ipaddress
 import json
 import logging
 import re
+import secrets
 import socket
 import time
 from pathlib import Path
@@ -302,13 +304,70 @@ async def lan_only(request, handler):
     return await handler(request)
 
 
+HOME_NETS = [ipaddress.ip_network(n) for n in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "169.254.0.0/16", "fc00::/7", "fe80::/10")]
+
+
+def is_home(ip) -> bool:
+    return any(ip.version == n.version and ip in n for n in HOME_NETS)
+
+
+def host_header_ok(value: str) -> bool:
+    """Only a home network IP address or localhost may be the Host the browser used (blocks DNS rebinding)."""
+    h = value.strip()
+    if h.startswith("["):
+        name = h[1:].split("]")[0]
+    else:
+        name = h.rsplit(":", 1)[0] if h.count(":") == 1 else h
+    if name.lower() == "localhost":
+        return True
+    try:
+        ip = ipaddress.ip_address(name)
+    except ValueError:
+        return False
+    return ip.is_loopback or is_home(ip)
+
+
+@web.middleware
+async def same_origin(request, handler):
+    """Web pages from other sites must not be able to drive the receiver through the user's browser."""
+    host = request.headers.get("Host", "")
+    if not host_header_ok(host):
+        raise web.HTTPForbidden(text="Host not allowed")
+    origin = request.headers.get("Origin")
+    if origin is not None and origin != f"{request.scheme}://{host}":
+        raise web.HTTPForbidden(text="Origin not allowed")
+    if request.headers.get("Sec-Fetch-Site", "same-origin") not in ("same-origin", "none"):
+        raise web.HTTPForbidden(text="Cross-site request refused")
+    return await handler(request)
+
+
+def clean_host(raw: str) -> str:
+    """A TV is a private network address: nothing else (no names, ports, paths, public or loopback addresses)."""
+    try:
+        ip = ipaddress.ip_address(str(raw).strip())
+    except ValueError:
+        raise web.HTTPBadRequest(text="Invalid TV address")
+    if ip.is_loopback or not is_home(ip):
+        raise web.HTTPBadRequest(text="Invalid TV address")
+    return str(ip)
+
+
+def host_param(request: web.Request) -> str:
+    return clean_host(request.query.get("host") or DEFAULT_HOST)
+
+
 async def scenes_get(_):
     return web.json_response(load_scenes())
 
 
 async def scenes_put(request: web.Request):
-    scenes = clean_scenes(await request.json())
-    (DATA / "scenes.json").write_text(json.dumps(scenes, ensure_ascii=False, indent=1), encoding="utf-8")
+    try:
+        scenes = clean_scenes(await request.json())
+    except (ValueError, TypeError, AttributeError, OverflowError):
+        raise web.HTTPBadRequest(text="Invalid scenes")
+    tmp = DATA / "scenes.json.tmp"
+    tmp.write_text(json.dumps(scenes, ensure_ascii=False, indent=1), encoding="utf-8")
+    tmp.replace(DATA / "scenes.json")
     return web.json_response(scenes)
 
 
@@ -319,7 +378,7 @@ SHORTCUT_KEYS = {"mute": "VOLUME_MUTE", "volume_up": "VOLUME_UP", "volume_down":
 async def shortcut(request: web.Request) -> web.Response:
     """Endpoint for iOS Shortcuts / Siri, home network only."""
     q = request.query
-    tv = get_tv(q.get("host", DEFAULT_HOST))
+    tv = get_tv(host_param(request))
     action, value = q.get("action", ""), q.get("value", "")
     try:
         if action == "wake":
@@ -339,7 +398,7 @@ async def shortcut(request: web.Request) -> web.Response:
             msg = "Volume set"
         elif action == "sleep":
             await tv.set_enabled(True)
-            await tv.sleep_timer(int(value))
+            await tv.sleep_timer(max(0, min(int(value), 360)))
             msg = "Timer set"
         elif action == "app":
             await tv.set_enabled(True)
@@ -360,25 +419,40 @@ async def shortcut(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "message": msg})
 
 
+MAX_TVS = 16
+
+
 def get_tv(host: str) -> Tv:
     tv = TVS.get(host)
     if tv is None:
+        if len(TVS) >= MAX_TVS:
+            raise web.HTTPTooManyRequests(text="Too many TVs")
         tv = TVS[host] = Tv(host)
         tv.task = asyncio.get_running_loop().create_task(tv.supervise())
     return tv
 
 
 async def ws_handler(request: web.Request) -> web.WebSocketResponse:
-    ws = web.WebSocketResponse(heartbeat=20)
+    tv = get_tv(host_param(request))
+    ws = web.WebSocketResponse(heartbeat=20, max_msg_size=65536)
     await ws.prepare(request)
-    tv = get_tv(request.query.get("host", DEFAULT_HOST))
     tv.clients.add(ws)
-    await ws.send_json(tv.state())
+    try:
+        await ws.send_json(tv.state())
+        await ws_loop(ws, tv)
+    finally:
+        tv.clients.discard(ws)
+    return ws
+
+
+async def ws_loop(ws: web.WebSocketResponse, tv: Tv) -> None:
     async for raw in ws:
         if raw.type != WSMsgType.TEXT:
             continue
         try:
             msg = json.loads(raw.data)
+            if not isinstance(msg, dict):
+                continue
             if msg.get("type") == "pair":
                 await tv.pair(str(msg.get("code", "")).strip().upper())
             elif msg.get("type") == "set_enabled":
@@ -397,10 +471,8 @@ async def ws_handler(request: web.Request) -> web.WebSocketResponse:
                 tv.volume_task = asyncio.get_running_loop().create_task(tv.set_volume(int(msg.get("level", 0))))
             elif tv.connected:
                 tv.handle(msg)
-        except (ValueError, ConnectionClosed, KeyError) as exc:
+        except (ValueError, TypeError, AttributeError, OverflowError, ConnectionClosed, KeyError) as exc:
             await ws.send_json({"type": "error", "message": str(exc)})
-    tv.clients.discard(ws)
-    return ws
 
 
 @web.middleware
@@ -441,7 +513,7 @@ INFO_PORTS = [(6466, "Remote control"), (6467, "Pairing"), (8008, "Cast (HTTP)")
 
 async def tv_info(request: web.Request) -> web.Response:
     """Collect everything the TV exposes on the network, without reading any content."""
-    host = request.query.get("host", DEFAULT_HOST)
+    host = host_param(request)
     sem = asyncio.Semaphore(20)
     async with aiohttp.ClientSession(trust_env=False) as session:
         eureka, desc, mac_name, latency, *ports = await asyncio.gather(
@@ -505,7 +577,8 @@ async def mac_and_name(host: str) -> tuple[str | None, str | None]:
     except Exception as exc:  # noqa: BLE001
         log.info("%s: name/MAC not read (%s)", host, type(exc).__name__)
         return None, None
-    MAC_CACHE[host] = result
+    if len(MAC_CACHE) < 256:
+        MAC_CACHE[host] = result
     return result
 
 
@@ -522,7 +595,17 @@ async def describe(host: str, kind: str) -> tuple[str, bool]:
         return host, False
 
 
+DISCOVER_LOCK = asyncio.Lock()
+
+
 async def discover(request: web.Request) -> web.Response:
+    if DISCOVER_LOCK.locked():
+        raise web.HTTPTooManyRequests(text="A scan is already running")
+    async with DISCOVER_LOCK:
+        return await run_discover()
+
+
+async def run_discover() -> web.Response:
     prefix = lan_ip().rsplit(".", 1)[0]
     sem = asyncio.Semaphore(500)
     hosts = [f"{prefix}.{i}" for i in range(1, 255)]
@@ -575,18 +658,34 @@ def lan_ip() -> str:
         s.close()
 
 
+def saved_port() -> int:
+    """Every installation gets its own random port, kept in bridge-data/port.txt."""
+    f = DATA / "port.txt"
+    try:
+        p = int(f.read_text().strip())
+        if 20000 <= p <= 59999:
+            return p
+    except (OSError, ValueError):
+        pass
+    p = 20000 + secrets.randbelow(40000)
+    f.write_text(str(p))
+    return p
+
+
 def main():
     global DEFAULT_HOST
     ap = argparse.ArgumentParser()
     ap.add_argument("--host", default=DEFAULT_HOST, help="default TV IP (optional: the app finds TVs by itself)")
-    ap.add_argument("--port", type=int, default=8780)
+    ap.add_argument("--port", type=int, default=None, help="port to use (default: a random port chosen the first time and remembered)")
     ap.add_argument("--lan", action="store_true", help="also listen on the network (needed for the phone); without it, only this computer")
     args = ap.parse_args()
     DEFAULT_HOST = args.host
-    DATA.mkdir(exist_ok=True)
+    DATA.mkdir(mode=0o700, exist_ok=True)
+    if args.port is None:
+        args.port = saved_port()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 
-    app = web.Application(middlewares=[lan_only, no_cache])
+    app = web.Application(middlewares=[lan_only, same_origin, no_cache], client_max_size=65536)
     app["port"] = args.port
     app.router.add_get("/connect", connect_page)
     app.router.add_get("/ws", ws_handler)

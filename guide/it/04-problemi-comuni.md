@@ -8,12 +8,12 @@
 - Ricevitore avviato **con `--lan`**? Senza, si connette solo il computer stesso.
 - **Firewall / profilo di rete di Windows:** imposta il Wi-Fi su **Privata** (Impostazioni, Rete, Wi-Fi, *Tipo di profilo di rete*). Con un profilo Pubblico Windows blocca le connessioni in entrata. Consenti Python sulle reti private quando richiesto.
 - **Isolamento dei client:** il Wi-Fi ospiti e alcuni router impediscono ai dispositivi di vedersi. Usa la rete principale o disattiva *AP / client isolation*.
-- Prova `http://<IP-del-computer>:8780/connect` dal computer per vedere l'IP corretto e un QR code.
-- Porta 8780 usata da altro? Avvia con `--port 8790` e usa il nuovo indirizzo.
+- Prova `http://<IP-del-computer>:<porta>/connect` dal computer per vedere l'indirizzo corretto e un QR code. La porta è stampata dal ricevitore.
+- Il ricevitore dice che la porta è occupata? Avvialo con `--port <un altro numero>` e usa il nuovo indirizzo.
 
 ## L'app si apre ma dice "Nessun ricevitore collegato"
 
-- Probabilmente hai aperto la **demo su GitHub Pages**. Pages è HTTPS e non può raggiungere il tuo ricevitore (i browser bloccano le pagine HTTPS che chiamano dispositivi HTTP locali). Apri invece l'app da `http://<IP-del-computer>:8780/`.
+- Probabilmente hai aperto la **demo su GitHub Pages**. Pages è HTTPS e non può raggiungere il tuo ricevitore (i browser bloccano le pagine HTTPS che chiamano dispositivi HTTP locali). Apri invece l'app da `http://<IP-del-computer>:<porta>/`.
 - Controlla **Impostazioni, Avanzate, Indirizzo del ricevitore**: lascialo vuoto quando apri l'app dal ricevitore.
 - La finestra del ricevitore è ancora aperta?
 
@@ -43,7 +43,15 @@ Non tutte le TV lo supportano. Attiva *Wake on LAN / Wake on Wi-Fi / Standby di 
 
 ## L'app sembra vecchia dopo un aggiornamento
 
-Chiudila e riaprila. Se persiste, elimina l'icona dalla Home e aggiungila di nuovo. Lato sviluppo: aumenta `VERSION` in `docs/service-worker.js` e `?v=N` in `docs/index.html`.
+Chiudila e riaprila. Se persiste, elimina l'icona dalla Home e aggiungila di nuovo. Lato sviluppo: aumenta `APP_VERSION` in `docs/version.js` e `?v=N` in `docs/index.html`.
+
+## App TV: messaggi e soluzioni
+
+- **"Attiva il debug di rete nelle opzioni sviluppatore della TV"**: accendi *Debug USB* e *Debug di rete* nelle Opzioni sviluppatore (vedi [08-installare-app-tv.md](08-installare-app-tv.md)).
+- **"Consenti il collegamento sullo schermo della TV"**: nel messaggio *Consentire il debug USB?* spunta *Consenti sempre da questo computer*, poi premi *Consenti*. Sparisce dopo circa un minuto; l'app lo richiede da sola.
+- **L'app chiede il PIN**: scrivi le 6 cifre mostrate sulla TV, oppure inquadra il QR sulla TV. Troppi tentativi sbagliati bloccano solo quel dispositivo per un minuto. Se hai cambiato telefono o il PIN sulla TV è cambiato, inquadra di nuovo il QR sulla TV.
+- **Ha smesso di funzionare dopo il riavvio della TV**: la TV può avere un nuovo indirizzo. Inquadra di nuovo il QR, oppure dai alla TV un IP fisso dal router.
+- **La pagina sembra troppo corta su iPhone subito dopo il salvataggio in Home**: chiudi l'app dal selettore delle app e riaprila.
 
 ## Specifiche per iPhone
 

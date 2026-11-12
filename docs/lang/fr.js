@@ -85,6 +85,8 @@
 
   "err.unreachable": "La TV est injoignable.", "err.wrong_code": "Code incorrect : regardez le nouveau code sur la TV.",
   "err.pairing_expired": "Association expirée : réessayez.",
+  "pin.title": "Saisissez le code PIN", "pin.hint": "Le code PIN s'affiche sur l'écran de la TV. Il suffit de le saisir une fois sur ce téléphone.", "pin.codeAria": "Code PIN affiché sur la TV", "pin.button": "Déverrouiller",
+  "err.bad_pin": "PIN incorrect : vérifiez celui de la TV.", "err.pin_locked": "Trop de tentatives : réessayez dans une minute.",
   "err.adb_off": "Activez le débogage réseau dans les options pour les développeurs de la TV.", "err.adb_authorize": "Autorisez la connexion sur l'écran de la TV (cochez Toujours autoriser).",
 
   "settings.title": "Réglages", "settings.language": "Langue", "settings.langAuto": "Automatique (langue du téléphone)",
@@ -92,8 +94,8 @@
   "settings.siriHint": "Dans <b>Raccourcis</b>, choisissez <b>Obtenir le contenu de l'URL</b>, collez l'adresse et donnez au raccourci la phrase que vous direz à Siri. Fonctionne uniquement sur votre Wi-Fi à la maison.",
   "settings.usage": "Utilisation", "settings.oneHand": "Mode une main", "settings.haptic": "Vibration des touches",
   "settings.hapticHint": "La vibration ne fonctionne que sur Android : l'iPhone ne la permet pas aux apps web.",
-  "settings.bridgeHint": "L'adresse que votre TV affiche dans l'app GlassRemoteTv (ou celle de l'ordinateur avec le récepteur). Depuis la page web, elle ouvre la copie de l'app qui est sur la TV : les navigateurs empêchent cette page de parler à votre réseau local.", "settings.bridgeBad": "Saisissez l'adresse, par exemple 192.168.1.3:8780.", "settings.bridgeOpening": "Ouverture de votre TV…", "remote.settings": "Réglages de la TV",
-  "settings.advanced": "Avancé", "settings.bridge": "Adresse du récepteur", "settings.bridgePh": "ex. 192.168.1.3:8780",
+  "settings.bridgeHint": "L'adresse que votre TV affiche dans l'app GlassRemoteTv (ou celle de l'ordinateur avec le récepteur). Depuis la page web, elle ouvre la copie de l'app qui est sur la TV : les navigateurs empêchent cette page de parler à votre réseau local.", "settings.bridgeBad": "Saisissez l'adresse, par exemple 192.168.1.50:41234.", "settings.bridgeOpening": "Ouverture de votre TV…", "remote.settings": "Réglages de la TV",
+  "settings.advanced": "Avancé", "settings.bridge": "Adresse du récepteur", "settings.bridgePh": "ex. 192.168.1.50:41234",
   "settings.saveBridge": "Enregistrer et connecter", "settings.footer": "GlassRemote {v} · sans publicité",
 
   "siri.noBridge": "Ouvrez l'app depuis l'adresse du récepteur pour voir les adresses.", "siri.on": "Allumer la TV",

@@ -85,6 +85,8 @@
 
   "err.unreachable": "The TV is unreachable.", "err.wrong_code": "Wrong code: read the new code on the TV.",
   "err.pairing_expired": "Pairing expired: try again.",
+  "pin.title": "Enter the PIN", "pin.hint": "The PIN is shown on the TV screen. You only need to type it once on this phone.", "pin.codeAria": "PIN shown on the TV", "pin.button": "Unlock",
+  "err.bad_pin": "Wrong PIN: check the one on the TV.", "err.pin_locked": "Too many attempts: try again in a minute.",
   "err.adb_off": "Turn on network debugging in the TV's developer options.", "err.adb_authorize": "Allow the connection on the TV screen (tick Always allow).",
 
   "settings.title": "Settings", "settings.language": "Language", "settings.langAuto": "Automatic (phone language)",
@@ -92,8 +94,8 @@
   "settings.siriHint": "In <b>Shortcuts</b> choose <b>Get contents of URL</b>, paste the address and name the shortcut with the phrase you will say to Siri. It only works on your home Wi-Fi.",
   "settings.usage": "Usage", "settings.oneHand": "One-handed mode", "settings.haptic": "Key vibration",
   "settings.hapticHint": "Vibration only works on Android: iPhone does not allow it for web apps.",
-  "settings.bridgeHint": "The address your TV shows in the GlassRemoteTv app (or of the computer running the receiver). From the web page it opens your TV's own copy of the app: browsers do not let this page talk to your home network.", "settings.bridgeBad": "Type the address, like 192.168.1.3:8780.", "settings.bridgeOpening": "Opening your TV…", "remote.settings": "TV settings",
-  "settings.advanced": "Advanced", "settings.bridge": "Receiver address", "settings.bridgePh": "e.g. 192.168.1.3:8780",
+  "settings.bridgeHint": "The address your TV shows in the GlassRemoteTv app (or of the computer running the receiver). From the web page it opens your TV's own copy of the app: browsers do not let this page talk to your home network.", "settings.bridgeBad": "Type the address, like 192.168.1.50:41234.", "settings.bridgeOpening": "Opening your TV…", "remote.settings": "TV settings",
+  "settings.advanced": "Advanced", "settings.bridge": "Receiver address", "settings.bridgePh": "e.g. 192.168.1.50:41234",
   "settings.saveBridge": "Save and connect", "settings.footer": "GlassRemote {v} · no ads",
 
   "siri.noBridge": "Open the app from the receiver address to see the addresses.", "siri.on": "Turn on the TV",

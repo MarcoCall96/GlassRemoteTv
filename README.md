@@ -45,22 +45,39 @@ GlassRemote is a small, fast, open-source web app that does one thing: **control
 ## How it works (the honest version)
 
 A web page cannot talk directly to a TV: browsers cannot open raw TCP sockets, and an HTTPS page cannot call a device on your home network.
-So GlassRemote has two parts:
+So GlassRemote needs a small **receiver** that sits between the phone and the TV. You can run it in two ways:
 
 ```
+ A) On the TV itself (no computer)
+ [ Phone: the app ]  --Wi-Fi-->  [ GlassRemoteTv, installed on the TV ]  --local ADB-->  [ the same TV ]
+     docs/ (PWA)                  tv-app/ (Android, plain Java)
+
+ B) On a computer
  [ Phone: the app ]  --Wi-Fi-->  [ Receiver ]  --Android TV Remote v2-->  [ Your TV ]
-   docs/  (PWA)                   receiver/ (Python, ~600 lines)           ports 6466 / 6467
+     docs/ (PWA)                  receiver/ (Python)                       ports 6466 / 6467
 ```
 
 1. **The app** (`docs/`): the interface you see. It also runs as a **demo** on GitHub Pages, with a fake TV.
-2. **The receiver** (`receiver/`): a tiny Python program that runs on a computer in your home and talks to the TV using the official Android TV Remote protocol. It also serves the app to your phone.
+2. **GlassRemoteTv** (`tv-app/`): an Android app you install on the TV. It serves the interface to your phone and sends the key presses to the TV. It shows a **QR code** on the TV screen: scan it and the app opens on your phone.
+3. **The receiver** (`receiver/`): the alternative, a tiny Python program for a computer in your home.
 
 > The live demo on GitHub Pages is just a preview: it cannot control a real TV.
-> To control your TV, open the app **from your receiver** (`http://<computer-ip>:8780`).
+> To control your TV, open the app **from your TV** (`http://<tv-ip>:<port>`, or scan the QR code on the TV screen) or from your receiver.
 
-> **Roadmap:** an Android app for the TV itself, so the receiver lives inside the TV and you do not need a computer at all. See [guide/06-android-tv-app-roadmap.md](guide/06-android-tv-app-roadmap.md). Contributors welcome!
+## Quick start with the TV app (5 minutes, no computer)
 
-## Quick start (5 minutes)
+**You need:** an Android TV / Google TV on your home Wi-Fi and an iPhone or Android phone on the same Wi-Fi.
+
+> The ready-to-install release lives in the [`AppTv/`](AppTv/README.md) folder of this repository: the signed APK (`AppTv/release/`), its checksum, step-by-step install guides and instructions for an AI assistant. The rest of the repository holds the web app, the demo, the computer receiver and the TV app sources.
+
+1. Download **GlassRemoteTv-x.y.z.apk** from the [Releases](https://github.com/MarcoCall96/GlassRemoteTv/releases) page (the same file and its `SHA256SUMS.txt` are in [AppTv/release/](AppTv/release/)) and install it on the TV (for example with the *Downloader* app, or `adb install`). Step by step: [AppTv/guide/01-install-on-your-tv.md](AppTv/guide/01-install-on-your-tv.md).
+2. On the TV turn on **network debugging**: Settings > Device Preferences > About > tap **Build** seven times > back > Developer options (full steps in the guide of step 1). Open **GlassRemoteTv** from the TV apps. When the TV asks *Allow USB debugging?*, tick **Always allow from this computer**, then press **Allow**.
+3. The TV shows a **QR code** and a **PIN**. Scan the code with your phone camera: the app opens and unlocks by itself.
+4. **iPhone:** Safari, Share, *Add to Home Screen* (type the PIN once more in the installed app). **Android:** Chrome menu, *Install app*.
+
+> Why network debugging? It is the only way a normal app can press the remote keys on an Android TV (the official remote service refuses requests that come from the TV itself). The PIN keeps other people on your Wi-Fi from using it. Read [guide/07-security.md](guide/07-security.md) first.
+
+## Quick start with a computer receiver (alternative)
 
 **You need:** a computer on your home Wi-Fi (Windows, macOS or Linux) with [Python 3.10+](https://www.python.org/downloads/), and an Android TV / Google TV on the same network.
 
@@ -73,7 +90,7 @@ pip install -r requirements.txt
 python bridge.py --lan
 ```
 
-The receiver prints an address like `http://192.168.x.x:8780/`.
+The receiver prints an address like `http://192.168.x.x:<port>/` (each installation uses its own random port).
 
 1. On your phone (same Wi-Fi) open that address. **iPhone:** Safari, then Share, then *Add to Home Screen*. **Android:** Chrome, then menu, then *Add to Home screen / Install app*.
 2. In the app tap **+** or **Search TVs on the network** and choose your TV.
@@ -96,8 +113,10 @@ Open the repo with your assistant and say: **"Set up GlassRemote for me."** It w
 ## Privacy and security
 
 - No data leaves your home network. There is no server, no analytics, no account.
-- The receiver only answers to devices on your **local network** and refuses everything else.
+- The TV app and the receiver only answer to devices on your **local network** and refuse everything else.
+- The TV app asks for a **PIN** (shown on the TV) once per phone. Without it nobody can control the TV.
 - **Never open ports on your router for it.** Never expose it to the internet.
+- The TV app needs network debugging on. You can turn it off at any time, and *Revoke USB debugging authorizations* removes every trusted device.
 - Your pairing key and certificate stay in `receiver/bridge-data/`, which is git-ignored.
 
 More in [guide/07-security.md](guide/07-security.md).
@@ -106,7 +125,7 @@ More in [guide/07-security.md](guide/07-security.md).
 
 Ideas, bug reports and pull requests are very welcome, especially for:
 
-- the **Android TV app** (Kotlin) that makes the computer unnecessary
+- the **TV app**: more TV brands, a nicer first-run screen, wake from standby
 - support for **Samsung, LG, Roku, Fire TV**
 - new **languages** and better translations
 - testing on more TVs and phones

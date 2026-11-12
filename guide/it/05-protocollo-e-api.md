@@ -53,6 +53,17 @@ L'app apre un socket per ogni TV. Il primo messaggio del server è uno `state`.
 
 Azioni di `/api/shortcut`: `wake`, `power_off`, `scene` (`value` = id della scena), `volume` (`value` = 0-100), `sleep` (`value` = minuti), `app` (`value` = pacchetto), più i tasti `mute`, `volume_up`, `volume_down`, `home`, `back`, `play_pause`. Risponde `{"ok":true,"message":"..."}`.
 
+## PIN (solo app TV)
+
+L'app TV (`tv-app/`) protegge i comandi con un PIN. Il ricevitore su computer non lo usa, quindi un client deve funzionare con o senza.
+
+- Alla connessione senza un token valido il server invia `{"type":"auth_required"}` e ignora ogni messaggio tranne `auth`.
+- Client: `{"type":"auth","pin":"123456"}` oppure `{"type":"auth","token":"..."}`. Risposte: `{"type":"auth_ok","token":"..."}` (poi un messaggio `state`) oppure `{"type":"auth_error","code":"bad_pin"|"pin_locked"}`.
+- Un token già noto si può passare anche come `/ws?host=IP&token=...`.
+- HTTP: `/api/shortcut`, `/api/info` e `PUT /api/scenes` richiedono il token nell'header `x-gr-token` o nel parametro `token`. Senza rispondono `401`.
+- Il blocco del PIN è per indirizzo del client: 5 tentativi sbagliati bloccano quell'indirizzo per 1 minuto, raddoppiando a ogni giro fino a 15 minuti. Dopo 30 tentativi sbagliati in totale l'app TV sceglie da sola un PIN NUOVO (lo schermo della TV e il codice QR si aggiornano).
+- Il codice QR sulla TV apre `http://<ip-tv>:<porta>/#pin=123456`. L'app legge il frammento (accetta ancora anche la vecchia forma `?pin=`), lo toglie dall'indirizzo e fa l'accesso.
+
 ## Formato di una scena
 
 ```json

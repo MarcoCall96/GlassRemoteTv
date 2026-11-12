@@ -7,7 +7,7 @@ The receiver (`receiver/bridge.py`) is a small Python program. It does two thing
 1. Talks to your TV with the **Android TV Remote v2** protocol (TLS on TCP ports **6466** for commands and **6467** for pairing).
 2. Serves the app (`docs/`) to your phone over your home Wi-Fi and relays commands through a WebSocket.
 
-You need a computer that stays on while you use the remote: a PC, a Mac, a mini PC, a Linux box or a Raspberry Pi. It must be on the **same network** as the TV and the phone. (A future Android TV app will remove this requirement, see [06-android-tv-app-roadmap.md](06-android-tv-app-roadmap.md).)
+You need a computer that stays on while you use the remote: a PC, a Mac, a mini PC, a Linux box or a Raspberry Pi. It must be on the **same network** as the TV and the phone. (If you have an Android TV, you do not need a computer: see [08-install-tv-app.md](08-install-tv-app.md).)
 
 ## Requirements
 
@@ -40,7 +40,7 @@ Use `python3` instead of `python` on macOS / Linux if needed.
 | Option | Meaning |
 |---|---|
 | `--lan` | Accept connections from other devices on your home network (needed for the phone). **Without it the receiver only answers on the computer itself.** |
-| `--port 8780` | Port to use (default 8780). Change it if it is taken. |
+| `--port <n>` | Force a specific port. Without it the receiver picks a random port the first time and remembers it in `receiver/bridge-data/port.txt`. |
 | `--host IP` | Default TV address, optional. The app finds TVs by itself. |
 
 ## What gets stored
@@ -48,6 +48,7 @@ Use `python3` instead of `python` on macOS / Linux if needed.
 `receiver/bridge-data/` is created on first start:
 
 - `cert.pem` and `key.pem`: the identity the TV trusts after pairing. **Anyone who has these files can control your TV. Never share or commit them** (they are in `.gitignore`).
+- `port.txt`: the port the receiver chose for this installation.
 - `scenes.json`: your scenes.
 
 To pair again from scratch (for example after a factory reset of the TV), delete `bridge-data/` and restart.
@@ -66,4 +67,4 @@ To pair again from scratch (for example after a factory reset of the TV), delete
 
 ## Check it works
 
-On the computer open `http://localhost:8780/` (you see the app). Open `http://localhost:8780/api/discover` to see the TVs it finds on your network as JSON.
+On the computer open `http://localhost:<port>/` (you see the app; use the port printed by the receiver). Open `http://localhost:<port>/api/discover` to see the TVs it finds on your network as JSON.

@@ -7,7 +7,7 @@ Il ricevitore (`receiver/bridge.py`) è un piccolo programma Python. Fa due cose
 1. Parla con la tua TV con il protocollo **Android TV Remote v2** (TLS sulle porte TCP **6466** per i comandi e **6467** per l'abbinamento).
 2. Serve l'app (`docs/`) al telefono sul Wi-Fi di casa e inoltra i comandi con un WebSocket.
 
-Serve un computer che resti acceso mentre usi il telecomando: PC, Mac, mini PC, Linux o Raspberry Pi. Deve stare nella **stessa rete** di TV e telefono. (Una futura app Android per la TV eliminerà questo requisito, vedi [06-app-android-tv-roadmap.md](06-app-android-tv-roadmap.md).)
+Serve un computer che resti acceso mentre usi il telecomando: PC, Mac, mini PC, Linux o Raspberry Pi. Deve stare nella **stessa rete** di TV e telefono. (Se hai una Android TV non ti serve un computer: vedi [08-installare-app-tv.md](08-installare-app-tv.md).)
 
 ## Requisiti
 
@@ -40,7 +40,7 @@ Su macOS / Linux usa `python3` al posto di `python` se serve.
 | Opzione | Significato |
 |---|---|
 | `--lan` | Accetta connessioni da altri dispositivi della rete di casa (serve al telefono). **Senza, il ricevitore risponde solo sul computer stesso.** |
-| `--port 8780` | Porta da usare (predefinita 8780). Cambiala se è occupata. |
+| `--port <n>` | Forza una porta precisa. Senza, il ricevitore sceglie una porta casuale la prima volta e la ricorda in `receiver/bridge-data/port.txt`. |
 | `--host IP` | IP della TV predefinita, facoltativo. L'app trova le TV da sola. |
 
 ## Cosa viene salvato
@@ -48,6 +48,7 @@ Su macOS / Linux usa `python3` al posto di `python` se serve.
 Al primo avvio nasce `receiver/bridge-data/`:
 
 - `cert.pem` e `key.pem`: l'identità di cui la TV si fida dopo l'abbinamento. **Chi ha questi file può comandare la tua TV. Non condividerli e non committarli** (sono nel `.gitignore`).
+- `port.txt`: la porta scelta dal ricevitore per questa installazione.
 - `scenes.json`: le tue scene.
 
 Per abbinare da zero (per esempio dopo un ripristino della TV) elimina `bridge-data/` e riavvia.
@@ -66,4 +67,4 @@ Per abbinare da zero (per esempio dopo un ripristino della TV) elimina `bridge-d
 
 ## Verificare che funzioni
 
-Sul computer apri `http://localhost:8780/` (vedi l'app). Apri `http://localhost:8780/api/discover` per vedere in JSON le TV trovate nella rete.
+Sul computer apri `http://localhost:<porta>/` (vedi l'app; usa la porta stampata dal ricevitore). Apri `http://localhost:<porta>/api/discover` per vedere in JSON le TV trovate nella rete.

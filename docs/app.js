@@ -384,11 +384,29 @@ function defaultBridge() {
 }
 const bridgeUrl = () => state.bridge || defaultBridge();
 const bridgeHttp = () => bridgeUrl().replace(/^ws/, "http").replace(/\/ws.*$/, "");
+
+/* PIN of the TV app: typed once (or scanned from the QR code), then kept as a token */
+const getToken = () => { try { return localStorage.getItem("gr.token") || ""; } catch { return ""; } };
+const setToken = (t) => { try { t ? localStorage.setItem("gr.token", t) : localStorage.removeItem("gr.token"); } catch { /* private mode */ } };
+let scannedPin = "";
+{
+  /* the QR code puts the PIN in the address fragment (#pin=...), which is never sent to the server nor kept in its logs */
+  const hp = new URLSearchParams(location.hash.replace(/^#/, ""));
+  const p = new URLSearchParams(location.search);
+  if (hp.has("pin") || p.has("pin")) {
+    scannedPin = ((hp.get("pin") || p.get("pin")) || "").replace(/\D/g, "").slice(0, 6);
+    p.delete("pin");
+    hp.delete("pin");
+    const q = p.toString(), h = hp.toString();
+    history.replaceState(null, "", location.pathname + (q ? "?" + q : "") + (h ? "#" + h : ""));
+  }
+}
 async function fetchJson(url, opts = {}, ms = 7000) {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), ms);
   try {
-    const r = await fetch(url, { ...opts, signal: ctl.signal });
+    const t = getToken();
+    const r = await fetch(url, { ...opts, headers: t ? { ...(opts.headers || {}), "x-gr-token": t } : opts.headers, signal: ctl.signal });
     if (!r.ok) throw new Error(r.status);
     return await r.json();
   } finally { clearTimeout(timer); }
@@ -400,7 +418,7 @@ function openConn(tv) {
   const old = state.conns[tv.host];
   if (old && old.readyState <= 1) return old;
   let ws;
-  try { ws = new WebSocket(`${base}?host=${encodeURIComponent(tv.host)}`); } catch { return null; }
+  try { ws = new WebSocket(`${base}?host=${encodeURIComponent(tv.host)}${getToken() ? "&token=" + encodeURIComponent(getToken()) : ""}`); } catch { return null; }
   state.conns[tv.host] = ws;
   ws.onopen = () => { state.bridgeOk = true; ws.send(JSON.stringify({ type: "set_enabled", enabled: !!tv.on })); };
   ws.onclose = () => {
@@ -413,6 +431,25 @@ function openConn(tv) {
   };
   ws.onmessage = (ev) => {
     let m; try { m = JSON.parse(ev.data); } catch { return; }
+    if (m.type === "auth_required") {
+      setToken("");
+      state.pinHost = tv.host;
+      if (scannedPin) { const p = scannedPin; scannedPin = ""; ws.send(JSON.stringify({ type: "auth", pin: p })); }
+      else { $("#pinMsg").textContent = ""; $("#pinCode").value = ""; openSheet("pinSheet"); }
+      return;
+    }
+    if (m.type === "auth_error") {
+      $("#pinMsg").textContent = errText(m.code);
+      if ($("#pinSheet").hidden) openSheet("pinSheet");
+      return;
+    }
+    if (m.type === "auth_ok") {
+      setToken(m.token);
+      if (!$("#pinSheet").hidden) closeSheets();
+      /* the connect request sent when the socket opened came before the sign-in and was ignored: send it again */
+      if (tv.on) ws.send(JSON.stringify({ type: "set_enabled", enabled: true }));
+      return;
+    }
     if (m.type !== "state") return;
     state.tvState[m.host] = { connected: m.tv_connected, pairing: m.needs_pairing, enabled: m.enabled, error: m.error,
       is_on: m.is_on, current_app: m.current_app, volume: m.volume, sleep_at: m.sleep_at };
@@ -469,6 +506,13 @@ function send(msg) {
   ws.send(JSON.stringify(msg));
   return true;
 }
+
+$("#pinBtn").addEventListener("click", () => {
+  const ws = state.conns[state.pinHost];
+  const pin = $("#pinCode").value.replace(/\D/g, "");
+  if (ws && ws.readyState === 1 && pin) ws.send(JSON.stringify({ type: "auth", pin }));
+  $("#pinCode").value = "";
+});
 
 $("#pairBtn").addEventListener("click", () => {
   const ws = state.conns[state.pairHost];
@@ -529,8 +573,9 @@ $("#scanBtn").addEventListener("click", () => scan(true));
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { scan(); connectAll(); } });
 addEventListener("online", () => { scan(); connectAll(); });
 function parseAddress(v) {
-  const m = String(v || "").trim().match(/^(?:\w+:\/\/)?([^\/\s:?#]+)(?::(\d+))?/);
-  return m ? { host: m[1], port: m[2] || "8780" } : null;
+  /* every TV app picks its own port, so the address must include it (shown on the TV next to the QR code) */
+  const m = String(v || "").trim().match(/^(?:https?:\/\/)?([A-Za-z0-9.-]{1,253}):(\d{1,5})\/?$/);
+  return m && +m[2] >= 1 && +m[2] <= 65535 ? { host: m[1], port: m[2] } : null;
 }
 const addressText = (ws) => String(ws || "").replace(/^wss?:\/\//, "").replace(/\/ws.*$/, "");
 $("#saveBridge").addEventListener("click", () => {
@@ -789,7 +834,7 @@ $("#scDelete").addEventListener("click", async () => { state.scenes = state.scen
 function renderSiri() {
   const t = currentTv(), base = bridgeHttp();
   if (!t || !base) { $("#siriList").innerHTML = `<div class="row"><span class="hint">${tr("siri.noBridge")}</span></div>`; return; }
-  const u = (action, value) => `${base}/api/shortcut?host=${encodeURIComponent(t.host)}&action=${action}${value != null ? "&value=" + encodeURIComponent(value) : ""}`;
+  const u = (action, value) => `${base}/api/shortcut?host=${encodeURIComponent(t.host)}&action=${action}${value != null ? "&value=" + encodeURIComponent(value) : ""}${getToken() ? "&token=" + encodeURIComponent(getToken()) : ""}`;
   const items = [[tr("siri.on"), u("wake"), "sun"], [tr("siri.off"), u("power_off"), "moon"], [tr("siri.mute"), u("mute"), "spark"],
     [tr("siri.sleep30"), u("sleep", 30), "clock"], ...state.scenes.map((s) => [tr("siri.scene", { name: sceneName(s) }), u("scene", s.id), s.icon])];
   $("#siriList").innerHTML = items.map(([name, url, ic], i) => `<div class="row item siri-row"><span class="sc-name">${iconSvg(ic)}${esc(name)}</span><button class="link" data-copy="${i}" aria-label="${esc(tr("siri.copyAria", { name }))}">${tr("siri.copy")}</button></div>`).join("");
@@ -1018,6 +1063,31 @@ $("#bridgeUrl").value = addressText(state.bridge);
 /* ---------- language: glass sheet instead of a native dropdown ---------- */
 /* version shown at the bottom of Settings: it comes from version.js, the single place where it is written */
 function paintFooter() { $("#appFooter").textContent = tr("settings.footer", { v: "v" + (self.APP_VERSION || "") }); }
+
+/* tap the version 5 times to see how the phone sizes the page (useful to report display problems) */
+function layoutReport() {
+  const probe = document.createElement("div");
+  probe.style.cssText = "position:fixed;visibility:hidden;padding-bottom:env(safe-area-inset-bottom,0px);padding-top:env(safe-area-inset-top,0px)";
+  document.body.appendChild(probe);
+  const cs = getComputedStyle(probe), safeB = cs.paddingBottom, safeT = cs.paddingTop;
+  probe.remove();
+  const dm = ["standalone", "fullscreen", "minimal-ui", "browser"].find((m) => matchMedia(`(display-mode: ${m})`).matches);
+  const tb = $(".tabbar") ? $(".tabbar").getBoundingClientRect() : null;
+  return { nav: navigator.standalone === true ? "ios-standalone" : "no", dm, proto: location.protocol,
+    win: `${innerWidth}x${innerHeight}`, outer: `${outerWidth}x${outerHeight}`, screen: `${screen.width}x${screen.height}`,
+    vv: window.visualViewport ? `${Math.round(window.visualViewport.height)}` : "-", doc: document.documentElement.clientHeight,
+    app: $("#app").offsetHeight, tabBottom: tb ? Math.round(tb.bottom) : null, safe: `${safeT}/${safeB}`, dpr: devicePixelRatio, ua: navigator.userAgent };
+}
+{
+  let taps = 0, timer;
+  $("#appFooter").addEventListener("click", () => {
+    clearTimeout(timer); timer = setTimeout(() => { taps = 0; }, 2500);
+    if (++taps < 5) return;
+    taps = 0;
+    const r = layoutReport();
+    toast(`${r.nav}/${r.dm} · ${r.proto} · win ${r.win} · screen ${r.screen} · app ${r.app} · safe ${r.safe}`, 12000);
+  });
+}
 function paintLang() {
   const pref = i18n.pref;
   $("#langCur").textContent = pref ? i18n.names[pref] : tr("settings.langAuto").replace(/\s*\(.*\)$/, "") + " · " + i18n.names[i18n.lang];
@@ -1055,8 +1125,8 @@ document.fonts?.ready.then(refreshLenses);
   const q = new URLSearchParams(location.search);
   if (q.get("on")) { state.tvs.forEach((t) => (t.on = true)); connectAll(); }
   if (q.get("s")) go(q.get("s"));
-  if (q.get("m")) $(`#modeSeg [data-mode="${q.get("m")}"]`)?.click();
-  if (q.get("f")) $(`#favSeg [data-filter="${q.get("f")}"]`)?.click();
+  if (["dpad", "touch", "numbers", "keyboard"].includes(q.get("m"))) $(`#modeSeg [data-mode="${q.get("m")}"]`)?.click();
+  if (["fav", "all"].includes(q.get("f"))) $(`#favSeg [data-filter="${q.get("f")}"]`)?.click();
   if (q.get("d")) setTimeout(() => { const c = $(".tv-card[data-i]"); if (c) openDetail(+c.dataset.i, c); }, 2500);
 }
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {

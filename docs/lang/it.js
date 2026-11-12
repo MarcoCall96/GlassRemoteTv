@@ -85,6 +85,8 @@
 
   "err.unreachable": "La TV non è raggiungibile.", "err.wrong_code": "Codice errato: guarda il nuovo codice sulla TV.",
   "err.pairing_expired": "Abbinamento scaduto: riprova.",
+  "pin.title": "Inserisci il PIN", "pin.hint": "Il PIN è mostrato sullo schermo della TV. Serve una volta sola su questo telefono.", "pin.codeAria": "PIN mostrato sulla TV", "pin.button": "Sblocca",
+  "err.bad_pin": "PIN errato: controlla quello sulla TV.", "err.pin_locked": "Troppi tentativi: riprova tra un minuto.",
   "err.adb_off": "Attiva il debug di rete nelle opzioni sviluppatore della TV.", "err.adb_authorize": "Consenti il collegamento sullo schermo della TV (spunta Consenti sempre).",
 
   "settings.title": "Impostazioni", "settings.language": "Lingua", "settings.langAuto": "Automatica (lingua del telefono)",
@@ -92,8 +94,8 @@
   "settings.siriHint": "In <b>Comandi Rapidi</b> scegli <b>Ottieni contenuti dell'URL</b>, incolla l'indirizzo e dai al comando il nome da dire a Siri. Funziona solo sul tuo Wi-Fi di casa.",
   "settings.usage": "Uso", "settings.oneHand": "Modalità a una mano", "settings.haptic": "Vibrazione ai tasti",
   "settings.hapticHint": "La vibrazione funziona solo su Android: iPhone non la consente alle web app.",
-  "settings.bridgeHint": "L'indirizzo che la TV mostra nell'app GlassRemoteTv (o del computer con il ricevitore). Dalla pagina web apre la copia dell'app sulla TV: i browser non permettono a questa pagina di parlare con la tua rete di casa.", "settings.bridgeBad": "Scrivi l'indirizzo, per esempio 192.168.1.3:8780.", "settings.bridgeOpening": "Apro la tua TV…", "remote.settings": "Impostazioni TV",
-  "settings.advanced": "Avanzate", "settings.bridge": "Indirizzo del ricevitore", "settings.bridgePh": "es. 192.168.1.3:8780",
+  "settings.bridgeHint": "L'indirizzo che la TV mostra nell'app GlassRemoteTv (o del computer con il ricevitore). Dalla pagina web apre la copia dell'app sulla TV: i browser non permettono a questa pagina di parlare con la tua rete di casa.", "settings.bridgeBad": "Scrivi l'indirizzo, per esempio 192.168.1.50:41234.", "settings.bridgeOpening": "Apro la tua TV…", "remote.settings": "Impostazioni TV",
+  "settings.advanced": "Avanzate", "settings.bridge": "Indirizzo del ricevitore", "settings.bridgePh": "es. 192.168.1.50:41234",
   "settings.saveBridge": "Salva e collega", "settings.footer": "GlassRemote {v} · senza pubblicità",
 
   "siri.noBridge": "Apri l'app dall'indirizzo del ricevitore per vedere gli indirizzi.", "siri.on": "Accendi la TV",

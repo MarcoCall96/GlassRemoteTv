@@ -8,12 +8,12 @@
 - Receiver started **with `--lan`**? Without it, only the computer itself can connect.
 - **Windows firewall / network profile:** set your Wi-Fi to **Private** (Settings, Network, Wi-Fi, *Network profile type*). On a Public profile Windows blocks incoming connections. Allow Python on private networks when asked.
 - **Client isolation:** guest Wi-Fi and some routers stop devices from seeing each other. Use the main network or disable *AP / client isolation*.
-- Try `http://<computer-ip>:8780/connect` from the computer to see the correct IP and a QR code.
-- Port 8780 used by something else? Start with `--port 8790` and use the new address.
+- Try `http://<computer-ip>:<port>/connect` from the computer to see the correct address and a QR code. The port is printed by the receiver.
+- The receiver says the port is taken? Start it with `--port <another number>` and use the new address.
 
 ## The app opens but says "No receiver connected"
 
-- You probably opened the **GitHub Pages demo**. Pages is HTTPS and cannot reach your receiver (browsers block HTTPS pages from calling local HTTP devices). Open the app from `http://<computer-ip>:8780/` instead.
+- You probably opened the **GitHub Pages demo**. Pages is HTTPS and cannot reach your receiver (browsers block HTTPS pages from calling local HTTP devices). Open the app from `http://<computer-ip>:<port>/` instead.
 - Check **Settings, Advanced, Receiver address**: leave it empty when you open the app from the receiver.
 - Is the receiver window still running?
 
@@ -43,7 +43,15 @@ Not every TV supports it. Enable *Wake on LAN / Wake on Wi-Fi / Network standby*
 
 ## The app looks old after an update
 
-Close and reopen it. If it persists, delete the home screen icon, add it again. On the development side bump `VERSION` in `docs/service-worker.js` and `?v=N` in `docs/index.html`.
+Close and reopen it. If it persists, delete the home screen icon, add it again. On the development side bump `APP_VERSION` in `docs/version.js` and `?v=N` in `docs/index.html`.
+
+## TV app: messages and fixes
+
+- **"Turn on network debugging on this TV"**: switch on *USB debugging* and *Network debugging* in Developer options (see [08-install-tv-app.md](08-install-tv-app.md)).
+- **"Allow the connection on the TV screen"**: on the *Allow USB debugging?* message tick *Always allow from this computer*, then press *Allow*. It disappears after about a minute; the app asks again by itself.
+- **The app asks for the PIN**: type the 6 digits shown on the TV, or scan the QR code on the TV. Too many wrong tries lock only that device for a minute. If you changed phones or the PIN on the TV changed, scan the QR code on the TV again.
+- **It stopped working after the TV restarted**: the TV may have a new address. Scan the QR code again, or give the TV a fixed IP in your router.
+- **The page looks too short on iPhone right after saving it to the Home Screen**: close the app from the app switcher and open it again.
 
 ## iPhone specifics
 

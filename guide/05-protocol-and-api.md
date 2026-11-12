@@ -53,6 +53,17 @@ The app opens one socket per TV. The first server message is a `state`.
 
 `/api/shortcut` actions: `wake`, `power_off`, `scene` (`value` = scene id), `volume` (`value` = 0-100), `sleep` (`value` = minutes), `app` (`value` = package), and the key shortcuts `mute`, `volume_up`, `volume_down`, `home`, `back`, `play_pause`. It answers `{"ok":true,"message":"..."}`.
 
+## PIN (TV app only)
+
+The TV app (`tv-app/`) protects commands with a PIN. The computer receiver does not use it, so a client must work with or without it.
+
+- On connect without a valid token the server sends `{"type":"auth_required"}` and ignores every message except `auth`.
+- Client: `{"type":"auth","pin":"123456"}` or `{"type":"auth","token":"..."}`. Answers: `{"type":"auth_ok","token":"..."}` (then a `state` message) or `{"type":"auth_error","code":"bad_pin"|"pin_locked"}`.
+- A known token can also be given as `/ws?host=IP&token=...`.
+- HTTP: `/api/shortcut`, `/api/info` and `PUT /api/scenes` need the token in the `x-gr-token` header or the `token` query parameter. Without it they answer `401`.
+- The PIN lock is kept per client address: 5 wrong tries lock that address for 1 minute, doubling each round up to 15 minutes. After 30 wrong tries in total the TV app picks a NEW PIN by itself (the TV screen and the QR code update).
+- The QR code on the TV opens `http://<tv-ip>:<port>/#pin=123456`. The app reads the fragment (it still accepts the old `?pin=` form too), removes it from the address and signs in.
+
 ## Scene format
 
 ```json

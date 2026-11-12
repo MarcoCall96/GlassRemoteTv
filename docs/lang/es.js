@@ -85,6 +85,8 @@
 
   "err.unreachable": "No se puede acceder a la TV.", "err.wrong_code": "Código incorrecto: mira el nuevo código en la TV.",
   "err.pairing_expired": "La vinculación ha caducado: inténtalo de nuevo.",
+  "pin.title": "Introduce el PIN", "pin.hint": "El PIN aparece en la pantalla de la TV. Solo hay que escribirlo una vez en este móvil.", "pin.codeAria": "PIN mostrado en la TV", "pin.button": "Desbloquear",
+  "err.bad_pin": "PIN incorrecto: comprueba el de la TV.", "err.pin_locked": "Demasiados intentos: vuelve a probar en un minuto.",
   "err.adb_off": "Activa la depuración de red en las opciones de desarrollador de la TV.", "err.adb_authorize": "Permite la conexión en la pantalla de la TV (marca Permitir siempre).",
 
   "settings.title": "Ajustes", "settings.language": "Idioma", "settings.langAuto": "Automático (idioma del teléfono)",
@@ -92,8 +94,8 @@
   "settings.siriHint": "En <b>Atajos</b> elige <b>Obtener contenido de la URL</b>, pega la dirección y ponle al atajo la frase que dirás a Siri. Solo funciona en tu Wi-Fi de casa.",
   "settings.usage": "Uso", "settings.oneHand": "Modo a una mano", "settings.haptic": "Vibración en las teclas",
   "settings.hapticHint": "La vibración solo funciona en Android: el iPhone no la permite en las apps web.",
-  "settings.bridgeHint": "La dirección que tu TV muestra en la app GlassRemoteTv (o la del ordenador con el receptor). Desde la página web abre la copia de la app que está en la TV: los navegadores no dejan que esta página hable con tu red doméstica.", "settings.bridgeBad": "Escribe la dirección, por ejemplo 192.168.1.3:8780.", "settings.bridgeOpening": "Abriendo tu TV…", "remote.settings": "Ajustes de la TV",
-  "settings.advanced": "Avanzado", "settings.bridge": "Dirección del receptor", "settings.bridgePh": "p. ej. 192.168.1.3:8780",
+  "settings.bridgeHint": "La dirección que tu TV muestra en la app GlassRemoteTv (o la del ordenador con el receptor). Desde la página web abre la copia de la app que está en la TV: los navegadores no dejan que esta página hable con tu red doméstica.", "settings.bridgeBad": "Escribe la dirección, por ejemplo 192.168.1.50:41234.", "settings.bridgeOpening": "Abriendo tu TV…", "remote.settings": "Ajustes de la TV",
+  "settings.advanced": "Avanzado", "settings.bridge": "Dirección del receptor", "settings.bridgePh": "p. ej. 192.168.1.50:41234",
   "settings.saveBridge": "Guardar y conectar", "settings.footer": "GlassRemote {v} · sin anuncios",
 
   "siri.noBridge": "Abre la app desde la dirección del receptor para ver las direcciones.", "siri.on": "Encender la TV",

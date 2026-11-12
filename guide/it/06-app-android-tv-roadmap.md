@@ -1,47 +1,33 @@
-# 6. Roadmap: l'app Android TV (senza computer)
+# 6. L'app Android TV: come funziona e cosa manca
 
 > English: [../06-android-tv-app-roadmap.md](../06-android-tv-app-roadmap.md)
 
-## L'idea
+L'app TV (`tv-app/`) è stata costruita. Questa pagina spiega come è fatta ed elenca le idee aperte per chi vuole contribuire. Per installarla vedi [08-installare-app-tv.md](08-installare-app-tv.md).
 
-Oggi serve un computer che esegue il ricevitore. L'obiettivo è **mettere il ricevitore dentro la TV**: una piccola app Android TV che
+## Cosa fa
 
-1. esegue sulla TV un piccolo server HTTP + WebSocket (per esempio `http://<IP-TV>:8780`) e serve la stessa PWA di `docs/`;
-2. parla con il **servizio Android TV Remote** della TV stessa (oppure con il sistema tramite un servizio di accessibilità);
-3. parte da sola all'accensione della TV, così il telefono funziona sempre senza computer.
+1. Esegue sulla TV un piccolo server HTTP e WebSocket (la porta è casuale e compare sullo schermo della TV) che serve `docs/` e parla lo **stesso protocollo** di `receiver/bridge.py` ([05-protocollo-e-api.md](05-protocollo-e-api.md)).
+2. Preme i tasti della TV tramite **ADB sull'indirizzo interno della TV** (debug di rete acceso).
+3. Mostra sullo schermo un codice QR, l'indirizzo e un PIN, e chiede il PIN una volta a ogni telefono.
+4. Parte da sola all'accensione della TV.
 
-Il telefono apre `http://<IP-TV>:8780`, tocca *Aggiungi alla schermata Home* e la configurazione finisce qui.
+## Scelte di progetto
 
-**Stato: non ancora costruita. I contributi sono benvenuti.** Il ricevitore Python è l'implementazione di riferimento: porta lo stesso comportamento.
-
-## Cosa serve all'app
-
-| Parte | Approccio suggerito |
+| Tema | Scelta |
 |---|---|
-| Linguaggio / strumenti | Kotlin, Android Studio (o JDK 17 + Android SDK 34 da riga di comando), `minSdk 23`, un'attività launcher Leanback perché compaia sulla TV |
-| Server HTTP + WebSocket | [Ktor](https://ktor.io/) (motore CIO) oppure NanoHTTPD + NanoWSD |
-| Servire la PWA | Includi `docs/` negli `assets/` dell'APK e servilo |
-| Invio dei tasti | Opzione A: connessione a `127.0.0.1:6466` con il protocollo Android TV Remote v2 (un port Kotlin di `androidtvremote2`). Opzione B: un **AccessibilityService** che invia eventi tasto. Opzione C: `InputManager` con permesso privilegiato (non disponibile alle app normali) |
-| Aprire le app | `PackageManager.getLaunchIntentForPackage(...)` oppure `getLeanbackLaunchIntentForPackage(...)`; il messaggio `launch` porta già il nome del pacchetto |
-| Abbinamento | Con l'opzione A si può evitare l'abbinamento verso localhost essendo la TV stessa |
-| Avvio all'accensione | Receiver `RECEIVE_BOOT_COMPLETED` + servizio in primo piano con notifica |
-| Sicurezza | Ascolta solo sulla LAN, rifiuta i client non privati (stessa regola `lan_only`), niente port forwarding, PIN facoltativo |
-| Riaccensione dallo standby | La rete della TV deve poterla svegliare; dal browser non si può inviare Wake-on-LAN, quindi per l'accensione può servire ancora un Comando Rapido o il ricevitore |
+| Linguaggio / strumenti | Java 8 semplice, senza Gradle e senza librerie. `build.ps1` usa `aapt2`, `javac`, `d8`, `zipalign` e `apksigner`. `minSdk 21`, `targetSdk 29`, un launcher Leanback perché compaia tra le app della TV |
+| Invio dei tasti | `input keyevent`, `input text`, `monkey` e `am start` tramite una shell ADB. Il servizio ufficiale Android TV Remote (porta 6466) è stato provato per primo, ma la TV chiude le connessioni che arrivano dalla TV stessa, quindi non può funzionare sul dispositivo |
+| Client ADB | `Adb.java` è un client ADB minimale (CNXN, AUTH con la chiave RSA dell'app, flussi shell). La chiave nasce al primo avvio e resta nella memoria privata dell'app |
+| Stato | Letto con `dumpsys window`, `dumpsys power` e `media volume`, poi inviato ai telefoni via WebSocket |
+| Volume | Volume assoluto con `media volume --stream 3 --set N` (da 0 a 100) |
+| Sicurezza | Solo rete locale, PIN più token, con limite ai tentativi. Vedi [07-sicurezza.md](07-sicurezza.md) |
+| App web | L'APK contiene una copia di `docs/` negli asset, quindi funziona senza internet |
 
-## Come installare un APK su una TV (per chi prova)
+## Idee aperte
 
-1. Costruisci l'APK (`./gradlew assembleDebug`).
-2. Sulla TV attiva le *Opzioni sviluppatore* (Impostazioni, Info, tocca *Build* sette volte), poi *Debug USB* o *Debug di rete* (alcune TV lo chiamano *Debug ADB*).
-3. Da un computer: `adb connect <IP-TV>:5555` poi `adb install app-debug.apk`.
-4. Oppure copia l'APK su una chiavetta USB e aprilo con un file manager per TV; consenti *Installa app sconosciute*.
-
-## Lista di controllo
-
-- [ ] L'app TV parte all'accensione e mostra una volta il suo indirizzo a schermo
-- [ ] La stessa PWA di `docs/` funziona senza modifiche (stesso protocollo WebSocket, vedi [05-protocollo-e-api.md](05-protocollo-e-api.md))
-- [ ] Tasti, testo, apertura app, scene, timer di spegnimento e volume funzionano
-- [ ] Rifiuta i client fuori dalla LAN
-- [ ] Niente pubblicità, niente analisi dati, niente account
-- [ ] Sezione nel README e un APK firmato in release
-
-Se inizi a lavorarci, apri una issue intitolata "Android TV app" per coordinarci.
+- Una schermata di primo avvio guidata sulla TV che apra le Opzioni sviluppatore.
+- Accensione dallo standby provata su più TV e un'opzione "accendi quando apro l'app sul telefono".
+- Misurare e ridurre la latenza dei tasti (il raggruppamento già aiuta).
+- Versioni per altre marche (Samsung Tizen, LG webOS, Roku, Fire TV), ciascuna come ricevitore con lo stesso protocollo WebSocket.
+- HTTPS con un certificato attendibile in locale, così l'app installata sul telefono e l'app TV condividono la stessa origine su iOS.
+- Funzionare senza debug di rete, se Android offrirà un modo sicuro per inviare i tasti del telecomando.

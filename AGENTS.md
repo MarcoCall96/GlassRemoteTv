@@ -7,7 +7,8 @@ The full guide is in **[CLAUDE.md](CLAUDE.md)** (English) and **[CLAUDE.it.md](C
 Short version:
 
 - Reply in the user's language. One step at a time.
+- To set up the TV app on a user's TV, follow AppTv/CLAUDE.md (Italian: AppTv/CLAUDE.it.md).
 - Never publish, push or open ports without asking. Never touch security settings on computers the user does not own.
 - Never expose personal data (IP, MAC, Wi-Fi/TV names, `receiver/bridge-data/`).
 - App code is in `docs/` (plain HTML/CSS/JS, translations in `docs/lang/`), receiver in `receiver/bridge.py`.
-- After changing `docs/`, bump `VERSION` in `docs/service-worker.js` and `?v=N` in `docs/index.html`. Every new string needs a key in all `docs/lang/*.js`.
+- After changing `docs/`, bump `APP_VERSION` in `docs/version.js` and `?v=N` in `docs/index.html` (and rebuild the TV app APK so it carries the new web app). Every new string needs a key in all `docs/lang/*.js`.

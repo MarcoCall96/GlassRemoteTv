@@ -10,10 +10,10 @@ Non servono App Store né Google Play. GlassRemote è una web app (PWA) che aggi
 Ti serve l'indirizzo del ricevitore. Avviandolo con `python bridge.py --lan` stampa:
 
 ```
-GlassRemote ready.  From your phone (same Wi-Fi) open:  http://192.168.x.x:8780/
+GlassRemote ready.  From your phone (same Wi-Fi) open:  http://192.168.x.x:<porta>/
 ```
 
-Il telefono deve stare sullo **stesso Wi-Fi** del computer che esegue il ricevitore. Puoi anche aprire `http://<IP-del-computer>:8780/connect` sul computer: mostra un **QR code** da inquadrare con la fotocamera.
+La porta la sceglie il ricevitore la prima volta e viene stampata qui. Il telefono deve stare sullo **stesso Wi-Fi** del computer che esegue il ricevitore. Puoi anche aprire `http://<IP-del-computer>:<porta>/connect` sul computer: mostra un **QR code** da inquadrare con la fotocamera.
 
 ## iPhone (Safari)
 
