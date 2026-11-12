@@ -21,17 +21,17 @@
   <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./assets/splash/splash-1284x2778.png">
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./assets/splash/splash-1170x2532.png">
   <!-- splash-ios:end -->
-  <link rel="stylesheet" href="./styles.css?v=60">
-  <script defer src="./version.js?v=66"></script>
-  <script defer src="./lang/en.js?v=64"></script>
-  <script defer src="./lang/it.js?v=64"></script>
-  <script defer src="./lang/es.js?v=64"></script>
-  <script defer src="./lang/fr.js?v=64"></script>
-  <script defer src="./lang/de.js?v=64"></script>
-  <script defer src="./lang/pt.js?v=64"></script>
+  <link rel="stylesheet" href="./styles.css?v=64">
+  <script defer src="./version.js?v=71"></script>
+  <script defer src="./lang/en.js?v=69"></script>
+  <script defer src="./lang/it.js?v=69"></script>
+  <script defer src="./lang/es.js?v=69"></script>
+  <script defer src="./lang/fr.js?v=69"></script>
+  <script defer src="./lang/de.js?v=69"></script>
+  <script defer src="./lang/pt.js?v=69"></script>
   <script defer src="./i18n.js?v=60"></script>
   <script defer src="./logos.js?v=60"></script>
-  <script defer src="./app.js?v=66"></script>
+  <script defer src="./app.js?v=71"></script>
 </head>
 <body>
   <div class="app" id="app">
@@ -175,6 +175,16 @@
         <button class="link" id="appsEdit" aria-pressed="false" data-i18n="c.edit">Edit</button>
       </header>
       <div class="scroll">
+        <div class="glass link-card" id="linkCard" hidden>
+          <h3 data-i18n="openlink.title">Open a link on the TV</h3>
+          <div class="link-field">
+            <input id="linkUrl" type="text" inputmode="url" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" enterkeyhint="go" placeholder="Paste a YouTube or web link" data-i18n-ph="openlink.placeholder" aria-label="Paste a YouTube or web link" data-i18n-aria="openlink.placeholder">
+            <button class="glass pill" id="linkPaste"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="12" height="16" rx="2.5"/><path d="M9 5V4h6v1M9 11h6M9 15h4"/></svg><span data-i18n="openlink.paste">Paste</span></button>
+          </div>
+          <div class="link-recent" id="linkRecent" role="group" hidden></div>
+          <button class="cta" id="linkGo" disabled><span class="spinner" id="linkSpin" hidden></span><span id="linkLbl" data-i18n="openlink.open">Open on TV</span></button>
+          <p class="hint" data-i18n="openlink.hint">Works with YouTube and other apps that open web links on the TV</p>
+        </div>
         <button class="glass tv-chip" id="appsTv" aria-label="Switch TV" data-i18n-aria="c.switchTv"></button>
         <div id="recentsBox" hidden>
           <div class="sect-head"><h2 data-i18n="apps.recents">Recent</h2></div>
@@ -212,6 +222,16 @@
         </div>
         <p class="hint pad" data-i18n="settings.hapticHint">Vibration only works on Android: iPhone does not allow it for web apps.</p>
 
+        <div id="healthEntry" hidden>
+          <div class="sect-head"><h2 data-i18n="nav.tv">TV</h2></div>
+          <div class="group">
+            <button class="row lang-row" id="healthBtn">
+              <span class="sc-name"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></svg><span data-i18n="health.title">TV health</span></span>
+              <span class="lang-cur"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+            </button>
+          </div>
+        </div>
+
         <details class="adv">
           <summary><span data-i18n="settings.advanced">Advanced</span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
           <div class="group">
@@ -223,6 +243,96 @@
           <p class="hint pad" id="connHint">Receiver: waiting…</p>
         </details>
         <p class="footnote" id="appFooter"></p>
+      </div>
+    </section>
+
+    <!-- ===== TV health (opened from Settings, not a tab) ===== -->
+    <section class="screen" id="screen-health" aria-label="TV health" data-i18n-aria="health.title">
+      <header class="topbar health-top">
+        <button class="glass round" id="healthBack" aria-label="Back" data-i18n-aria="remote.back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <h1 data-i18n="health.title">TV health</h1>
+      </header>
+      <div class="scroll">
+        <div class="h-pills" id="hPills"></div>
+        <div class="glass segmented two" id="healthSeg" role="group" aria-label="Sections" data-i18n-aria="health.tabsAria">
+          <button class="on" data-htab="perf" aria-pressed="true" data-i18n="health.tabPerf">Performance</button>
+          <button data-htab="procs" aria-pressed="false" data-i18n="health.tabProcs">Processes</button>
+        </div>
+        <p class="hint err h-nodata" id="hNoData" role="status" hidden data-i18n="health.noData">Can't read data from the TV. Check that the receiver and the TV are on.</p>
+
+        <div id="healthPerf">
+          <div class="glass verdict ok" id="hVerdict" hidden></div>
+
+          <div class="glass h-card" data-detail="cpu" role="button" tabindex="0" aria-haspopup="dialog" aria-label="What is using the CPU" data-i18n-aria="health.detailCpu">
+            <div class="h-head"><h3 data-i18n="health.cpu">CPU</h3><span class="h-meta" id="cpuMeta"></span></div>
+            <div class="h-big" id="cpuNow">–</div>
+            <canvas class="h-chart" id="cpuChart" role="img" aria-label="CPU usage, last 6 minutes" data-i18n-aria="health.chartCpu"></canvas>
+            <div class="h-axis"><span data-i18n="health.ago">6 min ago</span><span data-i18n="health.now">now</span></div>
+            <div id="coresBox" hidden>
+              <div class="h-sub" data-i18n="health.perCore">Per core</div>
+              <div class="cores" id="cores"></div>
+            </div>
+            <div class="h-more"><span data-i18n="health.detailMore">Details</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+          </div>
+
+          <div class="glass h-card" data-detail="mem" role="button" tabindex="0" aria-haspopup="dialog" aria-label="What is using the memory" data-i18n-aria="health.detailMem">
+            <div class="h-head"><h3 data-i18n="health.mem">Memory</h3><span class="h-meta" id="memMeta"></span></div>
+            <div class="h-big"><span id="ramNow">–</span><small data-i18n="health.ram">RAM</small></div>
+            <canvas class="h-chart" id="memChart" role="img" aria-label="Memory usage, last 6 minutes" data-i18n-aria="health.chartMem"></canvas>
+            <div class="h-axis"><span data-i18n="health.ago">6 min ago</span><span class="h-legend"><i class="ram"></i>RAM <i class="swap"></i>Swap</span><span data-i18n="health.now">now</span></div>
+            <div class="h-stats">
+              <div><small data-i18n="health.used">Used</small><b id="stUsed">–</b></div>
+              <div><small data-i18n="health.avail">Available</small><b id="stAvail">–</b></div>
+              <div><small data-i18n="health.swap">Swap</small><b id="stSwap">–</b></div>
+              <div><small data-i18n="health.cache">Cache</small><b id="stCache">–</b></div>
+            </div>
+            <div class="h-more"><span data-i18n="health.detailMore">Details</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+          </div>
+
+          <div class="sect-head"><h2 data-i18n="health.maint">Maintenance</h2></div>
+          <div class="group">
+            <div class="row tall">
+              <div class="stack"><b data-i18n="health.clean">Clean cache</b><small data-i18n="health.cleanHint">Frees space taken by the temporary files of apps.</small></div>
+              <button class="btn-s" id="cacheBtn"><span class="spinner" id="cacheSpin" hidden></span><span id="cacheLbl" data-i18n="health.cleanBtn">Clean</span></button>
+            </div>
+          </div>
+
+          <div class="skeleton" id="mLoading"></div>
+          <div id="mLoadErr" class="d-error" hidden>
+            <p class="hint err" data-i18n="health.maintFail">Can't read the restart settings.</p>
+            <button class="link" id="mRetry" data-i18n="c.retry">Try again</button>
+          </div>
+          <div id="mWrap" hidden>
+            <div class="group" id="mGroup">
+              <div class="row"><span id="lblReboot" data-i18n="health.reboot">Automatic restart</span>
+                <button class="switch" id="mSwitch" role="switch" aria-checked="false" aria-labelledby="lblReboot"><i></i></button></div>
+              <div class="m-dep">
+                <div class="m-block"><div class="segmented three" id="mFreq" role="group" aria-label="Repeat" data-i18n-aria="health.every">
+                  <button data-freq="daily" aria-pressed="false" data-i18n="health.daily">Daily</button>
+                  <button data-freq="weekly" aria-pressed="false" data-i18n="health.weekly">Weekly</button>
+                  <button data-freq="monthly" aria-pressed="false" data-i18n="health.monthly">Monthly</button>
+                </div></div>
+                <div class="m-block" id="mDayBox"><div class="day-grid" id="mDays" role="group" aria-label="Day" data-i18n-aria="health.day"></div></div>
+                <label class="row"><span data-i18n="health.time">Time</span><input class="time-in" id="mTime" type="time" step="60"></label>
+              </div>
+              <div class="row" id="mTvClockRow" hidden><p class="hint" data-i18n="health.tvClock">The TV clock is set to a different time zone: times here are TV time.</p></div>
+              <div class="row"><p class="hint" data-i18n="health.rebootNote">Restarts only when the TV is in standby; if it is on, it tries again 30 minutes later.</p></div>
+              <div class="row"><span data-i18n="health.last">Last restart</span><span class="rt" id="mLast">–</span></div>
+              <div class="row"><span data-i18n="health.next">Next restart</span><span class="rt" id="mNext">–</span></div>
+              <div class="row" id="mNoteRow"><p class="hint" id="mNote" hidden></p></div>
+            </div>
+            <button class="cta" id="mSave" data-i18n="c.save">Save</button>
+          </div>
+        </div>
+
+        <div id="healthProcs" hidden>
+          <div class="kb-field h-search">
+            <input id="pSearch" type="text" placeholder="Search processes" data-i18n-ph="health.search" aria-label="Search processes" data-i18n-aria="health.search" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="search">
+          </div>
+          <div class="sort-row" id="sortRow" role="group"></div>
+          <div class="group h-procs" id="procList"></div>
+          <p class="footnote" id="procNote"></p>
+        </div>
       </div>
     </section>
 
@@ -273,6 +383,26 @@
       <div class="grabber"></div>
       <h3 data-i18n="settings.language">Language</h3>
       <div class="group" id="langList"></div>
+    </div>
+
+    <!-- Clean cache confirmation -->
+    <div class="sheet" id="cacheSheet" role="dialog" aria-modal="true" aria-label="Clean the cache?" data-i18n-aria="health.cleanTitle" hidden>
+      <div class="grabber"></div>
+      <h3 data-i18n="health.cleanTitle">Clean the cache?</h3>
+      <p class="hint" data-i18n="health.cleanText">Apps may open a little slower the first time. Your accounts and settings are not touched.</p>
+      <button class="cta" id="cacheGo" data-i18n="health.clean">Clean cache</button>
+      <button class="link center" id="cacheNo" data-i18n="c.cancel">Cancel</button>
+    </div>
+
+    <!-- What is using the CPU / memory -->
+    <div class="sheet" id="detailSheet" role="dialog" aria-modal="true" aria-label="Details" data-i18n-aria="health.detailMore" hidden>
+      <div class="grabber"></div>
+      <div class="sheet-head">
+        <span></span>
+        <h3 id="dtTitle">Details</h3>
+        <button class="link strong" id="dtDone" data-i18n="c.done">Done</button>
+      </div>
+      <div class="dt-body" id="dtBody"></div>
     </div>
 
     <!-- Quick TV switch -->

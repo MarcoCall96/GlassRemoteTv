@@ -43,6 +43,18 @@ Per questo il **debug di rete** deve essere ATTIVO nelle Opzioni sviluppatore de
 - **Solo indirizzi privati.** Si possono collegare solo i dispositivi della tua rete di casa (indirizzi privati).
 - **Stesso PIN fino al ripristino.** PIN, porta e token restano finché non cancelli i dati dell'app.
 
+## Cosa aggiunge la 0.5.0
+
+- **Aiutante per i tasti.** Per i tasti veloci l'app TV avvia un piccolo aiutante (classe `app.glassremote.tv.Injector`, dentro lo stesso APK) con `app_process` come utente shell di ADB, su una seconda connessione ADB verso l'indirizzo loopback della TV stessa. Legge i codici dei tasti dal suo standard input. **Non apre nessun socket di rete** né nuove porte. Si ferma dopo 10 minuti senza tasti ed esce da solo quando l'app o la connessione si chiude. Se non riesce ad avviarsi, l'app torna a `input keyevent`.
+- **Nuovi endpoint, tutti dietro il token.** `GET /api/stats` (dati di salute, sola lettura), `POST /api/clean-cache` (`pm trim-caches`, solo file temporanei, al massimo una volta ogni 10 secondi), `GET`/`PUT /api/maintenance` (il calendario del riavvio) e `POST /api/open-link` (vedi sotto). Come ogni altro comando, ignorano un telefono senza token valido.
+- **Riavvio solo in standby.** Il riavvio automatico è spento di default, parte solo se la TV è in sospensione (Asleep/Dozing), mai due volte in 12 ore e mai nei primi 10 minuti dopo l'avvio. Un orologio sbagliato non può innescarlo in ciclo.
+- **Link e app.** La scheda **Apri un link sulla TV** manda il link a `POST /api/open-link` (JSON `{"url":"..."}`, dietro il token; risponde 200 `{"ok":true}`, 400 `invalid_link`, 405 se la richiesta non è POST, 401 senza token e 503 se la TV non è raggiungibile). La lista dei consentiti vale per questo endpoint e per l'apertura delle app: sono accettati solo link `http`/`https` con un host (niente `file:`, `content:`, `intent:`, `market:`, `javascript:`), le app devono avere un nome di pacchetto valido, e il link si apre con la categoria `BROWSABLE`. Apre solo link: non può inviare file né fare il cast di foto o video.
+- **Gli errori** restituiscono codici fissi, non il testo dell'eccezione.
+
+Cosa può fare un telefono che ha il PIN (e quindi un token): premere tasti, aprire link e app (un link può anche svegliare la TV dallo standby), leggere i dati di salute e l'elenco dei processi, pulire la cache delle app, impostare o spegnere il riavvio automatico. Non può comunque eseguire comandi shell arbitrari. Tieni privati il PIN e il QR, come prima.
+
+Noto e invariato: il server web della TV non controlla `Host`/`Origin` del WebSocket (i blocchi del PIN limitano i tentativi; potrebbe arrivare in una release futura), e il traffico è HTTP semplice sulla rete di casa, il compromesso descritto sopra. Altro in [../../../SECURITY-AUDIT.md](../../../SECURITY-AUDIT.md).
+
 ## Cosa fare
 
 1. Tieni il **debug di rete** spento quando non ti serve il telecomando, o almeno sta attento a cosa approvi.
@@ -75,4 +87,4 @@ Togli indirizzi IP e MAC, nomi della TV, nomi del Wi-Fi, nomi utente nei percors
 
 Apri un **security advisory privato** su GitHub (*Security*, *Report a vulnerability*) in questo repository, non una issue pubblica. Descrivi cosa hai trovato e come riprodurlo. Non includere il tuo PIN, i token o gli indirizzi.
 
-Vedi anche: [01-installare-sulla-tua-tv.md](01-installare-sulla-tua-tv.md), [03-problemi-comuni.md](03-problemi-comuni.md).
+Vedi anche: [01-installare-sulla-tua-tv.md](01-installare-sulla-tua-tv.md), [03-problemi-comuni.md](03-problemi-comuni.md), [05-salute-e-manutenzione.md](05-salute-e-manutenzione.md).

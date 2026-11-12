@@ -74,6 +74,51 @@ Ogni voce dice: **sintomo**, poi **causa**, poi **soluzione**.
 - **Causa:** la scheda di Safari e l'icona in Home hanno una memoria separata.
 - **Soluzione:** scrivi il PIN una volta nell'app installata. Basta una volta sola.
 
+## I tasti sono lenti
+
+- **Causa:** l'aiutante per i tasti non è in esecuzione, quindi ogni tasto passa dal metodo lento `input keyevent` (circa 1 secondo a tasto). L'aiutante parte quando un telefono si collega, quindi il primissimo tasto può essere ancora lento (circa 1 secondo), e si ferma dopo 10 minuti senza tasti: il primo tasto dopo una lunga pausa è di nuovo lento.
+- **Soluzione:** controlla che il **Debug di rete** sia attivo (all'aiutante serve la seconda connessione ADB). Se non riesce ad avviarsi, l'app passa da sola al metodo lento, quindi il telecomando continua a funzionare. Premi qualche tasto e dovrebbe diventare veloce. Vedi [05-salute-e-manutenzione.md](05-salute-e-manutenzione.md).
+
+## Non vedo il Cruscotto TV
+
+- **Causa:** la schermata compare solo quando risponde l'app TV. Non c'è con il ricevitore per computer, e una vecchia app TV (prima della 0.5.0) non ce l'ha.
+- **Soluzione:** installa GlassRemoteTv 0.5.0 o successiva sulla TV e apri l'app sul telefono dall'indirizzo della TV (o dal QR). Chiudi e riapri l'app sul telefono perché carichi la nuova versione.
+
+## I numeri del Cruscotto sembrano alti
+
+- **Causa:** fare la misura aggiunge un po' di carico finché la schermata è aperta. Inoltre `top` su Android dà valori a scalini grossolani (circa 3%), e i valori dei processi sono percentuali di un solo core, mentre i core mostrano la percentuale totale.
+- **Soluzione:** non c'è nessun problema. Chiudi la schermata e il carico sparisce. Guarda il giudizio e l'andamento più che un singolo numero. Vedi [05-salute-e-manutenzione.md](05-salute-e-manutenzione.md).
+
+## Il riavvio automatico non è avvenuto
+
+- **Causa:** una di queste:
+  - il calendario è spento o non è stato salvato (l'interruttore è spento di default);
+  - la TV era accesa a quell'ora: si riavvia solo in standby, riprova ogni 30 minuti per un massimo di 6 ore, poi passa alla scadenza successiva;
+  - l'ora è quella del **fuso orario della TV**, non del telefono;
+  - l'ultimo riavvio è di meno di 12 ore fa, oppure la TV si era avviata da meno di 10 minuti;
+  - la TV si è riavviata ma ha spento il **Debug di rete**, quindi il telecomando non funziona (alcuni modelli lo fanno).
+- **Soluzione:** controlla il calendario e l'orario "Prossimo riavvio" nel Cruscotto TV, e il fuso orario della TV. Se dopo un riavvio il Debug di rete è spento, riaccendilo e valuta di spegnere il calendario per quella TV.
+
+## "Pulisci la cache" libera 0 MB
+
+- **Causa:** la cache era già pulita, oppure le app avevano pochissimi dati temporanei.
+- **Soluzione:** non c'è nulla da sistemare. È normale e non significa che sia fallito.
+
+## Il link non apre nulla sulla TV
+
+- **Causa:** la TV non ha un'app che gestisca quel tipo di link. I link di Netflix, Prime Video o Disney+ si aprono solo se l'app della TV gestisce quel link web. Oppure il Debug di rete è spento.
+- **Soluzione:** prova un link `youtu.be` o `youtube.com` (l'app YouTube deve essere installata sulla TV). Controlla che il **Debug di rete** sia attivo. Ricorda che apre solo link: non fa il cast di foto o video dal telefono e non può inviare file. Vedi [05-salute-e-manutenzione.md](05-salute-e-manutenzione.md#apri-un-link-sulla-tv).
+
+## "Questo non è un link web"
+
+- **Causa:** sono accettati solo link `http` e `https` (niente `file:`, `content:`, `intent:`, `market:`, `javascript:`).
+- **Soluzione:** incolla un normale link web. Un link senza `http(s)://` ma con un punto, come `youtu.be/abc`, riceve da solo `https://`.
+
+## "La TV non è raggiungibile" aprendo un link
+
+- **Causa:** la TV è spenta dalla presa, non è in rete, oppure il Debug di rete è spento.
+- **Soluzione:** alimenta la TV (una TV in standby viene svegliata dal link), controlla il Wi-Fi e che il **Debug di rete** sia attivo, poi riprova.
+
 ## L'app sembra vecchia dopo un aggiornamento
 
 - **Soluzione:** chiudila e riaprila. Se resta vecchia, elimina l'icona dalla Home e aggiungila di nuovo.

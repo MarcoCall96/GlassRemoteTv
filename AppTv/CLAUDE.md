@@ -30,7 +30,7 @@ Be warm, concrete and brief. One step at a time. Confirm each step worked before
 Phone (web app)  --Wi-Fi-->  GlassRemoteTv (installed on the TV)  --ADB on loopback-->  the same TV
 ```
 
-- `AppTv/release/GlassRemoteTv-0.4.1.apk` and `AppTv/release/SHA256SUMS.txt`: the signed app and its checksum.
+- `AppTv/release/GlassRemoteTv-0.5.0.apk` and `AppTv/release/SHA256SUMS.txt`: the signed app and its checksum.
 - `AppTv/guide/` (English) and `AppTv/guide/it/` (Italiano): the step-by-step guides.
 - `tv-app/`: the Java app (plain Java, no Gradle), with its build script, tests and tools. The build bundles the phone web app from `docs/` in the APK.
 - It is one repository: the phone web app (`docs/`), the optional computer receiver (`receiver/`) and the TV app sources (`tv-app/`) are at the repository root, next to `AppTv/`.
@@ -41,7 +41,7 @@ Phone (web app)  --Wi-Fi-->  GlassRemoteTv (installed on the TV)  --ADB on loopb
 Ask one question at a time, offering choices. If you came here from the root `CLAUDE.md`, the user has already answered the Android TV / network debugging question there: below you only confirm it, you do not ask it again.
 
 1. **Which phone?** iPhone (Safari) or Android (Chrome).
-2. **Which TV?** Brand, model and Android version (TV Settings, Device Preferences, About). It needs **Android TV or Google TV**, Android 5 or newer (tested on Android 10). If it is a Samsung (Tizen), LG (webOS), Roku, Fire TV or Apple TV: explain honestly that it is **not supported**, and stop.
+2. **Which TV?** Brand, model and Android version (TV Settings, Device Preferences, About). It needs **Android TV or Google TV**. It is **tested on Android 10 only**; the APK installs from Android 5 but that is untested. Read [guide/06-tested-tvs.md](guide/06-tested-tvs.md). If the user's Android is 11 or newer, or the TV has only *Wireless debugging* (a pairing code) and no classic *Network debugging*, tell them honestly that it is untested and may not work (the TV shows the QR but cannot be controlled), and ask them to report the result (link in that guide). If it is a Samsung (Tizen), LG (webOS), Roku, Fire TV or Apple TV: explain honestly that it is **not supported**, and stop.
 3. **Is it their own TV on their own home Wi-Fi, with the phone on the same Wi-Fi?** If not, stop (golden rule 5).
 4. **Do they have a computer?** It is optional. It is only needed for the adb method (and to check a download for the USB method).
 5. **Which install method?**
@@ -57,20 +57,20 @@ Full text for the user: [guide/01-install-on-your-tv.md](guide/01-install-on-you
 
 ### 1. Get and verify the APK
 
-This step applies to the **USB stick** and **adb** methods: download `GlassRemoteTv-0.4.1.apk` from the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases) (the same file is also in `AppTv/release/`), then verify it (see "How to verify the APK" below).
+This step applies to the **USB stick** and **adb** methods: download `GlassRemoteTv-0.5.0.apk` from the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases) (the same file is also in `AppTv/release/`), then verify it (see "How to verify the APK" below).
 **Check:** the SHA-256 matches `AppTv/release/SHA256SUMS.txt`.
 
-**Downloader method:** nothing is downloaded in this step, because the TV cannot check a hash. The TV downloads the file over HTTPS from the official release URL in step 2. You, the AI assistant (you have the repository files), verify the hash of `AppTv/release/GlassRemoteTv-0.4.1.apk` against `AppTv/release/SHA256SUMS.txt` locally, and tell the user that the hash check on the TV is skipped. The Check passes when the user accepts that.
+**Downloader method:** nothing is downloaded in this step, because the TV cannot check a hash. The TV downloads the file over HTTPS from the official release URL in step 2. You, the AI assistant (you have the repository files), verify the hash of `AppTv/release/GlassRemoteTv-0.5.0.apk` against `AppTv/release/SHA256SUMS.txt` locally, and tell the user that the hash check on the TV is skipped. The Check passes when the user accepts that.
 
 ### 2. Install it on the TV
 
 - Downloader (Android TV / Google TV, no computer):
   1. On the TV open the **Google Play Store**, search for **Downloader** (by AFTVnews) and install it.
   2. Open it. At first run it asks for permission to access media/files: choose **Allow**.
-  3. Type the direct link in the URL field, then press **Go**: `https://github.com/MarcoCall96/GlassRemoteTv/releases/download/v0.4.1/GlassRemoteTv-0.4.1.apk` (fallback: `https://github.com/MarcoCall96/GlassRemoteTv/raw/main/AppTv/release/GlassRemoteTv-0.4.1.apk`). Typing a long URL with the TV remote is slow and must be exact: if the user struggles, suggest the shorter alternative, a USB stick or adb.
+  3. Type the direct link in the URL field, then press **Go**: `https://github.com/MarcoCall96/GlassRemoteTv/releases/download/v0.5.0/GlassRemoteTv-0.5.0.apk` (fallback: `https://github.com/MarcoCall96/GlassRemoteTv/raw/main/AppTv/release/GlassRemoteTv-0.5.0.apk`). Typing a long URL with the TV remote is slow and must be exact: if the user struggles, suggest the shorter alternative, a USB stick or adb.
   4. When it downloads, choose **Install**. If the TV blocks it, allow **Install unknown apps** for Downloader: Settings > Device Preferences > Security & restrictions > Unknown sources (menu names vary by TV brand).
 - USB stick: copy the APK, plug it into the TV, open it with a file manager, install.
-- adb: `adb connect 192.168.x.x:5555`, then `adb install GlassRemoteTv-0.4.1.apk` (network debugging must be on first, see step 3).
+- adb: `adb connect 192.168.x.x:5555`, then `adb install GlassRemoteTv-0.5.0.apk` (network debugging must be on first, see step 3).
 
 **Check:** a GlassRemoteTv icon is in the TV apps.
 
@@ -119,9 +119,20 @@ ADB navigation: `adb shell input keyevent <code>` with 3 = Home, 19 = Up, 20 = D
    4. Hold OK for 1.5 seconds with the focus on the app tile: `adb shell "CLASSPATH=/data/local/tmp/hold.jar app_process /system/bin Hold 23 1500"` (23 = OK, 1500 = milliseconds).
    5. When the menu is on screen (check the screenshot), choose **Move**, press Left (21) or Right (22) once per place, checking the screenshot now and then, then press OK (23) to drop it. From the last position, N presses of Left give position (count - N).
    6. When done, remove the helper from the TV: `adb shell rm /data/local/tmp/hold.jar`. Also delete `cls` and `hold.jar` from the computer.
-3. This was tested on Android 10 and may not work on every TV. If it fails, stop and give the user the manual steps.
+3. This was tested on Android 10 and may not work on every TV (see [guide/06-tested-tvs.md](guide/06-tested-tvs.md)). If it fails, stop and give the user the manual steps. If the TV is untested, ask the user to report the result.
 
 **Check:** a screenshot shows the app tile in the chosen position of the favorites row.
+
+### 9. Offer the new features (optional, last step)
+
+Once the remote works, offer in one or two sentences the features of 0.5.0, and only go on if the user is interested. Full text: [guide/05-health-and-maintenance.md](guide/05-health-and-maintenance.md).
+
+- **TV health screen** (Settings > TV health in the phone app): CPU, memory, a plain-language verdict and which apps use the resources.
+- **Clean cache** button on that screen (temporary files only, never data or logins).
+- **Open a link on the TV** card on the Apps screen: paste a YouTube or other web link and the TV opens it (the TV wakes from standby by itself).
+- **Automatic restart**, off by default. If the user wants a schedule, help them set it (daily, weekly or monthly, a time of day when the TV is in standby) and remind them to **test the first restart**: some TV models turn Network debugging off after a restart, and then the remote stops until they switch it on again.
+
+If the user is not interested, skip this step.
 
 ## Common failures and fixes
 
@@ -140,9 +151,9 @@ Full list: [guide/03-troubleshooting.md](guide/03-troubleshooting.md).
 
 ## How to verify the APK
 
-1. On Windows: `Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.4.1.apk`. On macOS or Linux: `shasum -a 256 GlassRemoteTv-0.4.1.apk`.
-2. Compare with `AppTv/release/SHA256SUMS.txt`. For 0.4.1 it is `d67e6d7af9b4aac38c8aaf5ae1f9e446fd9eee181b652d733f4f9b6099f15c8a`.
-3. Optional: `apksigner verify --print-certs GlassRemoteTv-0.4.1.apk` (Android build-tools). The certificate subject is `CN=GlassRemoteTv` and its SHA-256 is `62:38:B1:A8:AB:67:23:29:2A:25:60:C9:23:48:8C:82:05:B6:98:1E:61:5F:77:4C:2B:65:44:92:DF:6D:57:07`.
+1. On Windows: `Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.5.0.apk`. On macOS or Linux: `shasum -a 256 GlassRemoteTv-0.5.0.apk`.
+2. Compare with `AppTv/release/SHA256SUMS.txt`. For 0.5.0 it is `b005fe45eabd5b5a2a94b85c512989cb805b4f543846b80919cf6e2325d75731`.
+3. Optional: `apksigner verify --print-certs GlassRemoteTv-0.5.0.apk` (Android build-tools). The certificate subject is `CN=GlassRemoteTv` and its SHA-256 is `62:38:B1:A8:AB:67:23:29:2A:25:60:C9:23:48:8C:82:05:B6:98:1E:61:5F:77:4C:2B:65:44:92:DF:6D:57:07`.
 4. If it does not match, **do not install it**. Download it again from the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases).
 5. An APK the user built themselves is signed with their own key, so its fingerprint is different. That is fine.
 
@@ -160,7 +171,7 @@ Read [guide/04-build-from-source.md](guide/04-build-from-source.md).
 - Windows PowerShell, no Gradle. Needs a JDK 17+ and the Android SDK (build-tools 34, platforms;android-34), with `JAVA_HOME` and `ANDROID_HOME` set.
 - In `tv-app`: `powershell -File build.ps1` (APK in `build\GlassRemoteTv.apk`), or `powershell -File build.ps1 -Install 192.168.x.x:5555`. The script finds the web app in `..\docs`.
 - The first build creates the user's own signing key in `tv-app/keystore`. Never print, commit or share it.
-- Tests for the PIN logic: see the guide. Every output line must start with `PASS`.
+- Tests (`AuthTest` for the PIN logic, `FeaturesTest` for restart schedule, stats parser and link allowlist): see the guide. Every output line must start with `PASS`.
 - **Rule:** every change to the web app in `docs/` needs the version bump in `docs/version.js` and the `?v=N` in `docs/index.html`, then a rebuild of the APK.
 
 | What | Where |
@@ -169,6 +180,8 @@ Read [guide/04-build-from-source.md](guide/04-build-from-source.md).
 | HTTP and WebSocket server | `Server.java` |
 | PIN, tokens, port, lock | `Auth.java` |
 | Talks to the TV | `TvLink.java`, `Adb.java`, `Identity.java` |
+| Fast key helper | `KeyInjector.java` (TV side), `Injector.java` (runs as the ADB shell user) |
+| TV health, restart, links | `Stats.java`, `Maintenance.java`, `Schedule.java`, `Links.java` |
 | Background and boot | `ReceiverService.java`, `BootReceiver.java` |
 
 ## Privacy check before anything is published

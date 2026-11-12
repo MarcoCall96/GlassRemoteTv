@@ -1,1 +1,1 @@
-d67e6d7af9b4aac38c8aaf5ae1f9e446fd9eee181b652d733f4f9b6099f15c8a  GlassRemoteTv-0.4.1.apk
+b005fe45eabd5b5a2a94b85c512989cb805b4f543846b80919cf6e2325d75731  GlassRemoteTv-0.5.0.apk

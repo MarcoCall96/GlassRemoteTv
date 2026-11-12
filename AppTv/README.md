@@ -2,9 +2,11 @@
 
 **A free, ad-free remote control for your own Android TV / Google TV. It runs on the TV itself, so you do not need a computer.**
 
-[Italiano](README.it.md) · [Install guide](guide/01-install-on-your-tv.md) · [Security](guide/02-security.md) · [Troubleshooting](guide/03-troubleshooting.md) · [Build from source](guide/04-build-from-source.md)
+[Italiano](README.it.md) · [Install guide](guide/01-install-on-your-tv.md) · [Security](guide/02-security.md) · [Troubleshooting](guide/03-troubleshooting.md) · [Build from source](guide/04-build-from-source.md) · [Health and maintenance](guide/05-health-and-maintenance.md) · [Tested TVs](guide/06-tested-tvs.md)
 
 ![license](https://img.shields.io/badge/license-MIT-blue) ![ads](https://img.shields.io/badge/ads-none-brightgreen) ![account](https://img.shields.io/badge/account-none-brightgreen)
+
+<p align="center"><img src="../docs/assets/screenshots/demo.gif" alt="GlassRemote demo: open a link on the TV, TV health, what is using the CPU, automatic restart" width="300" /></p>
 
 ---
 
@@ -25,11 +27,26 @@ That is why you do not need a computer, a hub or a second device to keep running
 - No computer to leave switched on.
 - Plain Java, no libraries. The whole source is in this repository, in [tv-app/](../tv-app/).
 
+## What's new in 0.5.0
+
+TV app 0.5.0 (versionCode 6) with web app 0.8.1.
+
+- **Much faster keys.** A small helper inside the same APK (no network socket) injects the keys: about 10 ms instead of about 1000 ms per key on the test TV. If it cannot start, the app silently falls back to the old method.
+- **TV health screen** (Settings > TV health): CPU, memory, a plain-language verdict and a sortable Processes list. Tap the CPU or Memory card to see which apps use it.
+- **Clean cache button:** frees the apps' temporary files, never data or logins.
+- **Automatic restart (optional, off by default):** daily, weekly or monthly, and only when the TV is in standby.
+- **Snappier animations** in the web app.
+- **Open a link on the TV:** a new card on the Apps screen. Paste a YouTube or other web link, tap *Open on TV*: the TV wakes by itself and opens it in the app that handles it. Only http/https links are accepted, and the card appears only with the TV app (it is not a cast of photos or videos from the phone).
+- **Safer "open a link or app on the TV":** only http/https links and valid app package names.
+- A security review of the new code was done and its findings fixed before release, see [SECURITY-AUDIT.md](../SECURITY-AUDIT.md).
+
+How to use the new screen, the cache button and the automatic restart: [guide/05-health-and-maintenance.md](guide/05-health-and-maintenance.md). The health screen, the cache button and the restart exist only in the TV app, not in the computer receiver.
+
 ## Install in 5 minutes
 
 You need an Android TV / Google TV and an iPhone or Android phone, both on the same home Wi-Fi.
 
-1. **Download** `GlassRemoteTv-0.4.1.apk` from the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases). The same file is also committed in this repository as [release/GlassRemoteTv-0.4.1.apk](release/GlassRemoteTv-0.4.1.apk), with its [checksum](release/SHA256SUMS.txt). (With the Downloader app nothing is downloaded now: the TV fetches the file itself in step 2.)
+1. **Download** `GlassRemoteTv-0.5.0.apk` from the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases). The same file is also committed in this repository as [release/GlassRemoteTv-0.5.0.apk](release/GlassRemoteTv-0.5.0.apk), with its [checksum](release/SHA256SUMS.txt). (With the Downloader app nothing is downloaded now: the TV fetches the file itself in step 2.)
 2. **Install it on the TV.** Easiest way: the *Downloader* app on the TV and the direct link to the APK. Other ways (USB stick, adb) are in the [install guide](guide/01-install-on-your-tv.md).
 3. **Turn on network debugging** on the TV: Settings > Device Preferences > About > tap *Build* seven times > back > Developer options, then *USB debugging* and *Network debugging*.
 4. **Open GlassRemoteTv** from the TV apps. When the TV asks *Allow USB debugging?*, tick *Always allow from this computer*, then press *Allow*. You do this once. Keep the app open on the TV: the 6-digit PIN is shown there.
@@ -57,7 +74,7 @@ Please read [guide/02-security.md](guide/02-security.md) once. The short version
 
 ## Which TVs work
 
-Android TV and Google TV, Android 5 or newer (tested on Android 10). Not supported: Samsung (Tizen), LG (webOS), Roku, Fire TV, Apple TV.
+Android TV and Google TV. **Tested on Android 10 only**: see [Tested TVs](guide/06-tested-tvs.md), which also explains what to expect on other versions (the TV must offer *Network debugging*; Android 11 and newer are untested and many offer only *Wireless debugging*, which this app does not support). Not supported: Samsung (Tizen), LG (webOS), Roku, Fire TV, Apple TV. Tried it on your TV? [Report it](https://github.com/MarcoCall96/GlassRemoteTv/issues/new?template=tv-report.yml).
 
 The app speaks Italiano, English, Español, Français, Deutsch and Português.
 
@@ -66,23 +83,23 @@ The app speaks Italiano, English, Español, Français, Deutsch and Português.
 The APK is signed with the maintainer's key (certificate subject `CN=GlassRemoteTv`). Check the checksum against [release/SHA256SUMS.txt](release/SHA256SUMS.txt):
 
 ```powershell
-Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.4.1.apk
+Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.5.0.apk
 ```
 
 ```bash
-shasum -a 256 GlassRemoteTv-0.4.1.apk
+shasum -a 256 GlassRemoteTv-0.5.0.apk
 ```
 
-Expected SHA-256 of the 0.4.1 APK:
+Expected SHA-256 of the 0.5.0 APK:
 
 ```
-d67e6d7af9b4aac38c8aaf5ae1f9e446fd9eee181b652d733f4f9b6099f15c8a
+b005fe45eabd5b5a2a94b85c512989cb805b4f543846b80919cf6e2325d75731
 ```
 
 If you have the Android build-tools, you can also check the signature:
 
 ```
-apksigner verify --print-certs GlassRemoteTv-0.4.1.apk
+apksigner verify --print-certs GlassRemoteTv-0.5.0.apk
 ```
 
 The SHA-256 of the signing certificate must be:
@@ -100,7 +117,7 @@ GlassRemoteTv is one repository. This `AppTv/` folder holds the ready-to-install
 | Folder or file | What it holds |
 |---|---|
 | [release/](release/) | The signed APK and `SHA256SUMS.txt` |
-| [guide/](guide/01-install-on-your-tv.md) | Step-by-step guides (English), and `guide/it/` (Italiano) |
+| [guide/](guide/01-install-on-your-tv.md) | Step-by-step guides (English), including [health and maintenance](guide/05-health-and-maintenance.md), and `guide/it/` (Italiano) |
 | `CLAUDE.md`, `AGENTS.md` | Instructions for an AI coding assistant that helps you install it |
 | [../tv-app/](../tv-app/) | The Java app, its build script and tests. It bundles the phone web app from `docs/` into the APK |
 | [../docs/](../docs/) | The phone web app (source of truth) and its demo |

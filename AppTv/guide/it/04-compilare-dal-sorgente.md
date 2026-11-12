@@ -65,9 +65,19 @@ L'approvazione ADB una tantum e i telefoni salvati restano, perché la chiave di
 
 Più connessioni contemporanee usano più memoria della TV. Alza i numeri solo quanto serve.
 
+Altre piccole costanti, se vuoi cambiare il comportamento delle funzioni della 0.5.0 (cambia, ricompila, reinstalla):
+
+| Costante | File | Cosa imposta |
+|---|---|---|
+| riprova del riavvio 30 min, rinuncia 6 h, intervallo minimo 12 h | `tv-app/src/app/glassremote/tv/Maintenance.java` | Come il riavvio automatico riprova e ogni quanto può partire |
+| intervallo pulizia cache 10 s, cache delle statistiche 2 s | `tv-app/src/app/glassremote/tv/TvLink.java` | Ogni quanto si può pulire la cache e per quanto si riusa una lettura di salute |
+| `IDLE_MS` (10 minuti) | `tv-app/src/app/glassremote/tv/KeyInjector.java` | Quando l'aiutante per i tasti si ferma dopo l'ultimo tasto |
+
 ## Test
 
-I test coprono la logica del PIN (`Auth.java`): PIN giusto e sbagliato, il blocco per indirizzo, il nuovo PIN dopo troppi tentativi, la porta salvata. Girano su un JDK normale, con due piccoli sostituti di prova al posto delle classi di Android.
+I programmi di test sono due. Girano su un JDK normale. Ogni riga dell'output deve iniziare con `PASS`.
+
+`AuthTest` copre la logica del PIN (`Auth.java`): PIN giusto e sbagliato, il blocco per indirizzo, il nuovo PIN dopo troppi tentativi, la porta salvata. Usa due piccoli sostituti di prova al posto delle classi di Android.
 
 In `tv-app/tests`:
 
@@ -78,7 +88,23 @@ javac -d ..\build\authtest stubs\android\content\Context.java stubs\android\util
 java -cp ..\build\authtest app.glassremote.tv.AuthTest
 ```
 
+`FeaturesTest` (51 controlli) copre i calcoli del calendario del riavvio (compreso l'ora legale), la validazione della configurazione, il parser dei dati di carico e la lista dei link consentiti:
+
+```powershell
+cd tv-app
+$out = "build\featurestest"
+New-Item -ItemType Directory $out -Force | Out-Null
+javac -d $out src\app\glassremote\tv\Schedule.java src\app\glassremote\tv\Stats.java src\app\glassremote\tv\Links.java tests\FeaturesTest.java
+java -cp $out app.glassremote.tv.FeaturesTest
+```
+
 Ogni riga dell'output deve iniziare con `PASS`. Se una riga inizia con altro, qualcosa non va.
+
+## Come funziona l'aiutante per i tasti
+
+1. Quando un telefono si collega, l'app TV apre una seconda connessione ADB verso il proprio indirizzo loopback e avvia con `app_process` la classe `app.glassremote.tv.Injector` (dello stesso APK) come utente shell di ADB.
+2. `KeyInjector.java` scrive un codice tasto per riga sullo standard input dell'aiutante, che inietta il tasto. Non c'è nessun socket di rete. Passano circa 10 ms dal messaggio del telefono al tasto, invece di circa 1000 ms con `input keyevent`.
+3. L'aiutante si ferma dopo 10 minuti senza tasti (occupa circa 60 MB di RAM), esce quando l'app o la connessione si chiude, e se non riesce ad avviarsi l'app torna a `input keyevent`.
 
 ## Mappa del sorgente
 
@@ -88,21 +114,25 @@ Tutti i file Java sono in `tv-app/src/app/glassremote/tv/`.
 |---|---|
 | `MainActivity.java` | La schermata della TV: codice QR, indirizzo, PIN e stato |
 | `Qr.java` | Piccolo generatore di codici QR (modalità byte, livello M) |
-| `Server.java` | Server HTTP e WebSocket sulla porta casuale salvata; serve l'app web e gestisce i comandi del telefono |
+| `Server.java` | Server HTTP e WebSocket sulla porta casuale salvata; serve l'app web e gestisce i comandi del telefono (compresi `/api/stats`, `/api/clean-cache`, `/api/maintenance`, `/api/open-link`) |
 | `Auth.java` | Il PIN, i token, la porta salvata e il blocco anti tentativi |
-| `TvLink.java` | Parla con la TV: tasti, volume, app, stato |
-| `Adb.java`, `Identity.java` | Client ADB minimale e la sua identità RSA |
+| `TvLink.java` | Parla con la TV: tasti, volume, app, stato, lettura della salute, pulizia della cache |
+| `Adb.java`, `Identity.java` | Client ADB minimale (con un flusso di lunga durata e un exec con timeout più lungo) e la sua identità RSA |
+| `Injector.java`, `KeyInjector.java` | L'aiutante per i tasti che gira come utente shell di ADB, e la parte lato TV che lo avvia e lo alimenta |
+| `Stats.java` | Interpreta la lettura di salute (`/proc/stat`, `/proc/meminfo`, `loadavg`, `uptime`, `top`, `ps`) |
+| `Schedule.java`, `Maintenance.java` | Il riavvio automatico: calcoli e validazione del calendario, configurazione salvata (`maintenance.txt`) e relativi controlli |
+| `Links.java` | La lista dei link consentiti per "apri un link sulla TV" (`POST /api/open-link`, gestito in `Server.java` e `TvLink.java`) e il controllo del nome di pacchetto |
 | `ReceiverService.java`, `BootReceiver.java` | Tengono l'app attiva in background e la avviano all'accensione della TV |
 
 Altri posti:
 
 | Percorso | Contenuto |
 |---|---|
-| `docs/` | L'app web per telefono (HTML, CSS, JavaScript semplici) inclusa nell'APK |
+| `docs/` | L'app web per telefono (HTML, CSS, JavaScript semplici) inclusa nell'APK, compreso il Cruscotto TV |
 | `tv-app/res/` | Icona e banner della TV |
 | `tv-app/AndroidManifest.xml` | Permessi, voce nel launcher, servizio, ricevitore di avvio (`BootReceiver`) |
 | `tv-app/build.ps1` | Lo script di compilazione |
-| `tv-app/tests/` | `AuthTest.java` e i sostituti di prova |
+| `tv-app/tests/` | `AuthTest.java`, `FeaturesTest.java` e i sostituti di prova |
 | `tv-app/tools/hold-key/` | `Hold.java`, un helper che tiene premuto un tasto sulla TV (usato dalle istruzioni per l'assistente AI) |
 
 ## Regola quando modifichi l'app web

@@ -138,13 +138,33 @@ const SYSTEM_APPS = {
 };
 const appInfo = (pkg) => APPS.find((a) => a.pkg === pkg) || state.customApps.find((a) => a.pkg === pkg) || { name: (SYSTEM_APPS[pkg] && tr(SYSTEM_APPS[pkg])) || (pkg && pkg.split(".").pop().replace(/^./, (c) => c.toUpperCase())) || "—", bg: "#3a4056", fg: "#fff" };
 
+/* iOS only paints :active on touch devices when a touch listener exists: this gives instant press feedback */
+document.addEventListener("touchstart", () => {}, { passive: true });
+
+/* leaving elements fade out on a copy, so the real one can be hidden at once and the code that reads `hidden` stays simple */
+function ghostOut(el, frames, ms = 170) {
+  if (reduceMotion || !el || el.hidden || !el.animate) return;
+  const g = el.cloneNode(true);
+  g.removeAttribute("id");
+  g.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
+  g.dataset.ghost = "";
+  g.style.animation = "none"; g.style.pointerEvents = "none";
+  g.setAttribute("aria-hidden", "true"); g.inert = true;
+  el.after(g);
+  const done = () => g.remove();
+  g.animate(frames, { duration: ms, easing: "cubic-bezier(.3, 0, .8, .4)", fill: "forwards" }).finished.then(done, done);
+}
+
 /* ---------- toasts ---------- */
 let toastTimer = null;
 function toast(msg, ms = 2400) {
   const t = $("#toast");
   t.textContent = msg; t.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (t.hidden = true), ms);
+  toastTimer = setTimeout(() => {
+    ghostOut(t, [{ opacity: 1 }, { opacity: 0, transform: "translateX(-50%) translateY(8px)" }], 150);
+    t.hidden = true;
+  }, ms);
 }
 
 /* ---------- glass lens: placed on the real size of the active button ---------- */
@@ -157,14 +177,19 @@ function refreshLenses() {
   placeLens($("#tabbar"), $(".tab.on"));
   placeLens($("#modeSeg"), $("#modeSeg button.on"));
   placeLens($("#favSeg"), $("#favSeg button.on"));
+  placeLens($("#healthSeg"), $("#healthSeg button.on"));
+  placeLens($("#mFreq"), $("#mFreq button.on"));
 }
 addEventListener("resize", refreshLenses);
 
 /* ---------- navigation ---------- */
 function go(screen) {
   $$(".screen").forEach((s) => s.classList.toggle("active", s.id === "screen-" + screen));
-  $$(".tab").forEach((t) => { const on = t.dataset.screen === screen; t.classList.toggle("on", on); on ? t.setAttribute("aria-current", "page") : t.removeAttribute("aria-current"); });
+  /* the TV health screen hangs off Settings, so that tab stays lit */
+  const tab = screen === "health" ? "settings" : screen;
+  $$(".tab").forEach((t) => { const on = t.dataset.screen === tab; t.classList.toggle("on", on); on ? t.setAttribute("aria-current", "page") : t.removeAttribute("aria-current"); });
   refreshLenses();
+  healthSync();
 }
 $("#tabbar").addEventListener("click", (e) => { const t = e.target.closest(".tab"); if (t) go(t.dataset.screen); });
 
@@ -341,8 +366,12 @@ function openSheet(id) {
   s.hidden = false; s.tabIndex = -1; s.focus({ preventScroll: true });
 }
 function closeSheets(keepBackdrop) {
-  if (keepBackdrop !== true) $("#sheetBackdrop").hidden = true;
-  $$(".sheet").forEach((s) => (s.hidden = true));
+  const closing = keepBackdrop !== true;
+  if (closing) { ghostOut($("#sheetBackdrop"), [{ opacity: 1 }, { opacity: 0 }], 150); $("#sheetBackdrop").hidden = true; }
+  $$(".sheet:not([data-ghost])").forEach((s) => {
+    if (closing) ghostOut(s, [{ transform: "translateY(0)", opacity: 1 }, { transform: "translateY(32px)", opacity: 0 }], 170);
+    s.hidden = true;
+  });
 }
 $("#sheetBackdrop").addEventListener("click", () => { closeSheets(); closeDetail(); });
 addEventListener("keydown", (e) => { if (e.key === "Escape") { closeSheets(); closeDetail(); } });
@@ -419,7 +448,11 @@ async function fetchJson(url, opts = {}, ms = 7000) {
   try {
     const t = getToken();
     const r = await fetch(url, { ...opts, headers: t ? { ...(opts.headers || {}), "x-gr-token": t } : opts.headers, signal: ctl.signal });
-    if (!r.ok) throw new Error(r.status);
+    if (!r.ok) {
+      let body = null;
+      try { body = await r.json(); } catch { /* not JSON */ }
+      throw Object.assign(new Error(r.status), { status: r.status, body });
+    }
     return await r.json();
   } finally { clearTimeout(timer); }
 }
@@ -553,7 +586,7 @@ function paintConnHint() {
 async function scan(force = false) {
   if (force === true) { state.ignored = []; localStorage.removeItem("ignored"); }
   const base = bridgeHttp();
-  if (!base) { state.bridgeOk = false; setScanHint("scan.noBridge"); paintConnHint(); renderTvs(); return; }
+  if (!base) { state.bridgeOk = false; setScanHint("scan.noBridge"); paintConnHint(); renderTvs(); probeHealth(); return; }
   if (scanning) return;
   scanning = true;
   setScanHint("scan.searching");
@@ -580,6 +613,7 @@ async function scan(force = false) {
   scanning = false;
   paintConnHint();
   renderTvs();
+  probeHealth();
 }
 $("#scanBtn").addEventListener("click", () => scan(true));
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { scan(); connectAll(); } });
@@ -616,7 +650,7 @@ document.addEventListener("pointerdown", (e) => {
   b.classList.add("on-press");
   if (!press(b.dataset.key)) return;
   if (b.classList.contains("rep")) {
-    holdTimer = setTimeout(() => { repeatTimer = setInterval(() => press(b.dataset.key), 110); }, 380);
+    holdTimer = setTimeout(() => { repeatTimer = setInterval(() => press(b.dataset.key), 110); }, 320);
   }
 });
 ["pointerup", "pointercancel", "pointerleave"].forEach((ev) =>
@@ -637,7 +671,7 @@ $("#modeSeg").addEventListener("click", (e) => {
   const pad = $("#touchpad"), dot = $("#tpDot");
   let lx = 0, ly = 0, moved = false;
   const STEP = 44;
-  const flash = (dir) => { const c = $(`.tp.${dir}`, pad); c.classList.add("on"); setTimeout(() => c.classList.remove("on"), 180); };
+  const flash = (dir) => { const c = $(`.tp.${dir}`, pad); c.classList.add("on"); setTimeout(() => c.classList.remove("on"), 130); };
   const place = (e) => { const r = pad.getBoundingClientRect(); dot.style.left = e.clientX - r.left + "px"; dot.style.top = e.clientY - r.top + "px"; };
   pad.addEventListener("pointerdown", (e) => { pad.setPointerCapture(e.pointerId); lx = e.clientX; ly = e.clientY; moved = false; dot.hidden = false; place(e); });
   pad.addEventListener("pointermove", (e) => {
@@ -652,7 +686,7 @@ $("#modeSeg").addEventListener("click", (e) => {
     lx = e.clientX; ly = e.clientY;
   });
   const end = () => { dot.hidden = true; };
-  pad.addEventListener("pointerup", () => { if (!moved) { press("DPAD_CENTER"); pad.classList.add("tap"); setTimeout(() => pad.classList.remove("tap"), 160); } end(); });
+  pad.addEventListener("pointerup", () => { if (!moved) { press("DPAD_CENTER"); pad.classList.add("tap"); setTimeout(() => pad.classList.remove("tap"), 120); } end(); });
   pad.addEventListener("pointercancel", end);
 })();
 
@@ -701,7 +735,7 @@ $("#kbRows").addEventListener("pointerdown", (e) => {
   if (!b) return;
   e.preventDefault();
   kbPress(b.dataset.k);
-  if (b.dataset.k === "BKSP") kbHold = setTimeout(() => { kbRep = setInterval(() => kbPress("BKSP"), 90); }, 380);
+  if (b.dataset.k === "BKSP") kbHold = setTimeout(() => { kbRep = setInterval(() => kbPress("BKSP"), 90); }, 320);
 });
 ["pointerup", "pointercancel", "pointerleave"].forEach((ev) =>
   $("#kbRows").addEventListener(ev, () => { clearTimeout(kbHold); clearInterval(kbRep); }));
@@ -862,7 +896,7 @@ $("#siriList").addEventListener("click", async (e) => {
 /* ---------- details card: the card flips and opens ---------- */
 const flip = $("#flip"), flipInner = $("#flipInner");
 let detail = null;
-const FLIP_MS = reduceMotion ? 1 : 720;
+const FLIP_MS = reduceMotion ? 1 : 480;
 const rel = (el) => {
   const a = $(".app").getBoundingClientRect(), r = el.getBoundingClientRect();
   return { left: r.left - a.left, top: r.top - a.top, width: r.width, height: r.height };
@@ -911,9 +945,9 @@ async function openDetail(i, cardEl) {
   cardEl.style.visibility = "hidden";
   flip.style.right = "auto"; flip.style.bottom = "auto";
   Object.assign(flip.style, px(to));
-  const move = flip.animate([px(from), px(to)], { duration: FLIP_MS, easing: "cubic-bezier(.3,.85,.25,1)" });
+  const move = flip.animate([px(from), px(to)], { duration: FLIP_MS, easing: "cubic-bezier(.25, .9, .3, 1)" });
   flipInner.style.transform = "rotateY(180deg)";
-  flipInner.animate([{ transform: "rotateY(0deg)" }, { transform: "rotateY(180deg)" }], { duration: FLIP_MS, easing: "cubic-bezier(.45,.05,.25,1)" });
+  flipInner.animate([{ transform: "rotateY(0deg)" }, { transform: "rotateY(180deg)" }], { duration: FLIP_MS, easing: "cubic-bezier(.4, .1, .2, 1)" });
   await move.finished;
   flip.style.cssText = "";
   $("#flipFront").style.visibility = "hidden";
@@ -933,10 +967,10 @@ async function closeDetail() {
   flip.style.right = "auto"; flip.style.bottom = "auto";
   Object.assign(flip.style, px(to));
   card.style.visibility = "hidden";
-  const ms = Math.max(1, FLIP_MS - 100);
-  const move = flip.animate([px(from), px(to)], { duration: ms, easing: "cubic-bezier(.3,.85,.25,1)" });
+  const ms = Math.max(1, FLIP_MS - 80);
+  const move = flip.animate([px(from), px(to)], { duration: ms, easing: "cubic-bezier(.25, .9, .3, 1)" });
   flipInner.style.transform = "rotateY(0deg)";
-  flipInner.animate([{ transform: "rotateY(180deg)" }, { transform: "rotateY(0deg)" }], { duration: ms, easing: "cubic-bezier(.45,.05,.25,1)" });
+  flipInner.animate([{ transform: "rotateY(180deg)" }, { transform: "rotateY(0deg)" }], { duration: ms, easing: "cubic-bezier(.4, .1, .2, 1)" });
   await move.finished;
   flip.hidden = true; flip.style.cssText = ""; flipInner.style.transform = "";
   card.style.visibility = "";
@@ -1118,9 +1152,634 @@ $("#langList").addEventListener("click", (e) => {
 });
 document.addEventListener("langchange", () => {
   renderBrands(); renderKb(); refreshSceneApps(); renderSiri(); renderTvs(); refreshRemote(); refreshApps();
-  paintEditButtons(); paintScanHint(); paintConnHint(); paintLang(); paintFooter();
+  paintEditButtons(); paintScanHint(); paintConnHint(); paintLang(); paintFooter(); paintHealthAll();
   requestAnimationFrame(refreshLenses);
 });
+
+/* ---------- TV health: live stats, processes and maintenance ---------- */
+const HEALTH_MS = 3000, HEALTH_SAMPLES = 120;
+const FORCE_DEMO = new URLSearchParams(location.search).has("demo");
+const health = { timer: null, busy: false, shown: false, src: null, tab: "perf", ok: null, last: null, hist: [],
+  sort: { key: "cpu", dir: -1 }, q: "", maint: null, maintErr: false, cleaning: false, saving: false, lastAuth: 0 };
+const healthDemo = () => FORCE_DEMO || !bridgeHttp();
+const nf1 = (v) => Number(v).toLocaleString(i18n.lang, { maximumFractionDigits: 1 });
+const fmtPct = (v) => (v > 0 && v < 10 ? nf1(v) : Math.round(v)) + "%";
+const fmtMb = (mb) => (mb >= 1024 ? nf1(mb / 1024) + " GB" : Math.round(mb) + " MB");
+const pad2 = (n) => String(n).padStart(2, "0");
+/* the TV may be in another time zone: labels are built from the TV clock offset, not the phone's */
+const phoneOffsetMin = () => -new Date().getTimezoneOffset();
+const fmtWhen = (ms, offMin = phoneOffsetMin()) => new Date(ms + offMin * 60000).toLocaleString(i18n.lang, { timeZone: "UTC", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+function fmtDur(sec) {
+  const d = Math.floor(sec / 86400), h = Math.floor((sec % 86400) / 3600), m = Math.floor((sec % 3600) / 60);
+  return [d ? `${d} ${tr("health.unitD")}` : "", d || h ? `${h} h` : "", `${m} min`].filter(Boolean).join(" ");
+}
+
+/* Reboot schedule helpers: freq daily|weekly|monthly, day = ISO weekday 1..7 (weekly) or 1..28 (monthly) */
+const REBOOT_DEFAULT = { enabled: false, freq: "weekly", day: 7, hour: 4, minute: 0 };
+function normReboot(x) {
+  const r = { ...REBOOT_DEFAULT, ...(x || {}) };
+  r.enabled = !!r.enabled;
+  if (!["daily", "weekly", "monthly"].includes(r.freq)) r.freq = "weekly";
+  const lim = r.freq === "monthly" ? 28 : 7;
+  r.day = Math.min(lim, Math.max(1, Math.round(+r.day) || 1));
+  r.hour = Math.min(23, Math.max(0, Math.round(+r.hour) || 0));
+  r.minute = Math.min(59, Math.max(0, Math.round(+r.minute) || 0));
+  return r;
+}
+function nextRun(r, now = Date.now()) {
+  const d = new Date(now);
+  d.setHours(r.hour, r.minute, 0, 0);
+  if (r.freq === "daily") { if (d.getTime() <= now) d.setDate(d.getDate() + 1); }
+  else if (r.freq === "weekly") {
+    d.setDate(d.getDate() + ((r.day - (((d.getDay() + 6) % 7) + 1) + 7) % 7));
+    if (d.getTime() <= now) d.setDate(d.getDate() + 7);
+  } else {
+    d.setDate(r.day);
+    if (d.getTime() <= now) d.setMonth(d.getMonth() + 1);
+  }
+  return d.getTime();
+}
+
+/* Two data sources with the same shape: the receiver on the TV, and a simulation for the public demo */
+const apiOk = (r) => { if (!r || r.ok === false) throw Object.assign(new Error("api"), { body: r }); return r; };
+const realSource = {
+  stats: () => fetchJson(bridgeHttp() + "/api/stats", {}, 4500).then(apiOk),
+  cleanCache: () => fetchJson(bridgeHttp() + "/api/clean-cache", { method: "POST" }, 30000).then(apiOk),
+  getMaintenance: () => fetchJson(bridgeHttp() + "/api/maintenance", {}, 6000).then(apiOk),
+  setMaintenance: (reboot) => fetchJson(bridgeHttp() + "/api/maintenance",
+    { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reboot }) }, 8000).then(apiOk),
+  openLink: (url) => fetchJson(bridgeHttp() + "/api/open-link",
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) }, 10000).then(apiOk),
+};
+const demoSource = (() => {
+  const TOT = 1696, SWAP_TOT = 300, KEY = "gr.demo.maint";
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const boot = Date.now() - (2 * 86400 + 5 * 3600 + 17 * 60) * 1000;
+  let load = 17, target = 17, ram = 1090, swap = 118, cache = 210, temp = 49, freq = 1500;
+  const offsets = [6, -4, 2, -3];
+  /* name, share of the CPU, memory MB, user */
+  const procs = [
+    ["com.netflix.ninja", .34, 310, "u0_a54"], ["system_server", .14, 210, "system"], ["surfaceflinger", .12, 38, "system"],
+    ["android.hardware.media.c2@1.2-service", .06, 28, "mediacodec"], ["com.google.android.tvlauncher", .06, 140, "u0_a21"],
+    ["com.google.android.youtube.tv", .05, 190, "u0_a37"], ["com.google.android.gms.persistent", .04, 120, "u0_a8"],
+    ["audioserver", .03, 24, "audioserver"], ["com.android.vending", .02, 96, "u0_a19"],
+    ["com.google.android.tvrecommendations", .02, 74, "u0_a22"], ["com.android.systemui", .02, 88, "u0_a14"],
+    ["adbd", .01, 6, "shell"], ["logd", .01, 4, "logd"], ["netd", .01, 7, "root"], ["wpa_supplicant", .01, 5, "wifi"],
+    ["com.google.android.katniss:search", .02, 52, "u0_a31"], ["com.google.android.katniss", .015, 78, "u0_a31"],
+    ["com.google.android.gms.unstable", .01, 46, "u0_a8"], ["com.netflix.ninja:service", .02, 38, "u0_a54"], ["zygote64", .01, 22, "root"],
+  ].map((p, i) => ({ name: p[0], share: p[1], ram: p[2], user: p[3], pid: 190 + i * 211 + Math.floor(rnd(0, 90)) }));
+  const step = () => {
+    if (Math.random() < .08) target = rnd(8, 62);
+    load = clamp(load + (target - load) * .18 + rnd(-2.5, 2.5), 3, 92);
+    ram = clamp(ram + rnd(-14, 14), 900, 1480);
+    swap = clamp(swap + rnd(-3, 3.5), 40, 260);
+    cache = clamp(cache + rnd(-1, 2.5), 20, 480);
+    temp = clamp(temp + (load / 2 + 36 - temp) * .05 + rnd(-.3, .3), 38, 78);
+    freq = Math.round(1000 + load * 9 + rnd(-25, 25));
+  };
+  const snapshot = () => {
+    step();
+    const cores = offsets.map((o) => Math.round(clamp(load + o + rnd(-6, 6), 0, 100) * 10) / 10);
+    const cpu = Math.round((cores.reduce((a, b) => a + b, 0) / cores.length) * 10) / 10;
+    const used = Math.round(ram);
+    const rows = procs.map((p) => ({ pid: p.pid, name: p.name, cpu: Math.round(cpu * p.share * 2.4 * rnd(.8, 1.2) * 10) / 10, ramMb: Math.round(p.ram * rnd(.97, 1.03)), user: p.user }));
+    return { ok: true, screenOn: true, app: "com.netflix.ninja", upSec: Math.floor((Date.now() - boot) / 1000), cpu, cores, freqMhz: freq, tempC: Math.round(temp * 10) / 10,
+      load: [+(cpu / 25).toFixed(2), +(cpu / 28).toFixed(2), +(cpu / 30).toFixed(2)],
+      ramTotMb: TOT, ramUsedMb: used, ramAvailMb: TOT - used, cacheMb: Math.round(cache), swapTotMb: SWAP_TOT, swapUsedMb: Math.round(swap),
+      procs: [...rows].sort((a, b) => b.cpu - a.cpu).slice(0, 40),
+      memProcs: rows.map(({ pid, name, ramMb, user }) => ({ pid, name, ramMb, user })).sort((a, b) => b.ramMb - a.ramMb).slice(0, 30) };
+  };
+  const saved = () => store.get(KEY, {});
+  const maintenance = () => {
+    const s = saved(), r = normReboot(s.reboot);
+    return { ok: true, reboot: r, lastRebootMs: s.last || 0, nextRebootMs: r.enabled ? nextRun(r) : 0, nowMs: Date.now(), tzOffsetMin: phoneOffsetMin(), note: "" };
+  };
+  const later = (v, ms) => new Promise((res) => setTimeout(() => res(v), ms));
+  return {
+    stats: () => later(snapshot(), 90),
+    history: (n) => Array.from({ length: n }, snapshot),
+    cleanCache: () => later(null, rnd(900, 1500)).then(() => {
+      const freed = Math.max(0, Math.round(Math.min(cache - 15, rnd(60, 240))));
+      cache -= freed; ram = Math.max(900, ram - freed * .2);
+      return { ok: true, freedMb: freed };
+    }),
+    getMaintenance: () => later(maintenance(), 120),
+    openLink: () => later({ ok: true }, 600),
+    setMaintenance: (reboot) => {
+      try { store.set(KEY, { ...saved(), reboot: normReboot(reboot) }); } catch { /* private mode */ }
+      return later(maintenance(), 200);
+    },
+  };
+})();
+const healthSource = () => (healthDemo() ? demoSource : realSource);
+
+/* the TV health row and the "open a link" card only exist when the receiver answers /api/stats (or in the demo) */
+const probe = { base: null, state: "", busy: false };
+function setHealthEntry(show) {
+  $("#healthEntry").hidden = !show;
+  $("#linkCard").hidden = !show;
+  if (!show && $("#screen-health").classList.contains("active")) go("settings");
+}
+async function probeHealth() {
+  if (healthDemo()) { probe.base = null; probe.state = ""; return setHealthEntry(true); }
+  const base = bridgeHttp();
+  if (probe.busy || (probe.base === base && (probe.state === "yes" || probe.state === "no"))) return;
+  probe.base = base; probe.busy = true;
+  try { const r = await realSource.stats(); probe.state = r && r.ok === true ? "yes" : "no"; }
+  catch (e) { probe.state = e.status === 401 ? "yes" : e.status === 404 || e instanceof SyntaxError ? "no" : ""; }
+  probe.busy = false;
+  if (probe.base === bridgeHttp()) setHealthEntry(probe.state === "yes");
+}
+
+function onUnauthorized() {
+  if (Date.now() - health.lastAuth < 20000) return;
+  health.lastAuth = Date.now();
+  setToken("");
+  toast(tr("health.pinNeeded"));
+  closeAll(); connectAll();
+  if (!Object.keys(state.conns).length && currentTv()) openConn(currentTv());
+}
+
+function pushSample(s, t = Date.now()) {
+  const pct = (a, b) => (b > 0 ? Math.min(100, Math.max(0, (a / b) * 100)) : 0);
+  health.hist.push({ t, cpu: Math.min(100, Math.max(0, +s.cpu || 0)), ram: pct(s.ramUsedMb, s.ramTotMb), swap: pct(s.swapUsedMb, s.swapTotMb) });
+  while (health.hist.length > HEALTH_SAMPLES) health.hist.shift();
+}
+async function healthPoll() {
+  if (health.busy) return;
+  health.busy = true;
+  const src = healthSource();
+  if (health.src !== src) Object.assign(health, { src, hist: [], last: null, ok: null, maint: null, maintErr: false });
+  try {
+    if (!health.hist.length && src.history) {
+      const past = src.history(HEALTH_SAMPLES - 1), now = Date.now();
+      past.forEach((s, i) => pushSample(s, now - (past.length - i) * HEALTH_MS));
+    }
+    const s = await src.stats();
+    if (healthSource() === src) { pushSample(s); health.last = s; health.ok = true; }
+  } catch (e) {
+    health.ok = false;
+    if (e && e.status === 401) onUnauthorized();
+  }
+  health.busy = false;
+  paintHealth();
+}
+/* polls every 3 s, and only while the screen is on show and the page is visible */
+function healthSync() {
+  const active = $("#screen-health").classList.contains("active");
+  if (active && !health.shown) { health.shown = true; healthOpened(); }
+  if (!active) health.shown = false;
+  const want = active && !document.hidden;
+  if (want && !health.timer) { healthPoll(); health.timer = setInterval(healthPoll, HEALTH_MS); }
+  else if (!want && health.timer) { clearInterval(health.timer); health.timer = null; }
+}
+document.addEventListener("visibilitychange", healthSync);
+function healthOpened() {
+  if (health.src && health.src !== healthSource()) Object.assign(health, { src: null, hist: [], last: null, ok: null, maint: null, maintErr: false });
+  paintSortChips(); paintHealth(); paintMaint(); loadMaint();
+  requestAnimationFrame(paintHealth);
+}
+
+function healthVerdict(s) {
+  const bad = [], warn = [];
+  const swapPct = s.swapTotMb > 0 ? (s.swapUsedMb / s.swapTotMb) * 100 : 0;
+  if (s.cpu > 70) bad.push(["health.r.cpuBad"]); else if (s.cpu > 40) warn.push(["health.r.cpuWarn"]);
+  if (s.ramAvailMb < 150) bad.push(["health.r.memBad"]); else if (s.ramAvailMb < 300) warn.push(["health.r.memWarn"]);
+  if (swapPct > 85) bad.push(["health.r.swapBad"]); else if (swapPct > 55) warn.push(["health.r.swapWarn"]);
+  if (s.upSec > 14 * 86400) warn.push(["health.r.upWarn", { d: Math.floor(s.upSec / 86400) }]);
+  const level = bad.length ? "bad" : warn.length ? "warn" : "ok";
+  return { level, reasons: [...bad, ...warn].length ? [...bad, ...warn] : [["health.r.ok"]] };
+}
+const VERDICT_ICON = {
+  ok: '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>',
+  warn: '<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/>',
+  bad: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16h.01"/>',
+};
+
+function paintHealthPills() {
+  const s = health.last, parts = [];
+  const [cls, label] = health.ok === false ? ["off", tr("status.noReply")] : health.ok ? ["on", tr("status.linked")] : ["warn", tr("status.connecting")];
+  parts.push(`<span class="h-pill"><span class="dot ${cls}"></span>${esc(label)}</span>`);
+  if (s && health.ok) {
+    parts.push(`<span class="h-pill"><span class="dot ${s.screenOn ? "on" : ""}"></span>${tr(s.screenOn ? "health.screenOn" : "health.screenOff")}</span>`);
+    if (s.app) parts.push(`<span class="h-pill"><span class="t">${tr("health.inApp", { name: esc(appInfo(s.app).name) })}</span></span>`);
+    if (s.upSec != null) parts.push(`<span class="h-pill">${esc(tr("health.up", { t: fmtDur(s.upSec) }))}</span>`);
+  }
+  if (healthDemo()) parts.push(`<span class="h-pill demo">${tr("health.demo")}</span>`);
+  $("#hPills").innerHTML = parts.join("");
+}
+
+function paintCores(cores) {
+  const box = $("#cores");
+  $("#coresBox").hidden = !cores.length;
+  if (box.children.length !== cores.length) box.innerHTML = cores.map((_, i) => `<div class="core"><span>${i + 1}</span><i><b></b></i><em></em></div>`).join("");
+  cores.forEach((v, i) => {
+    v = Math.min(100, Math.max(0, +v || 0));
+    const row = box.children[i], bar = row.querySelector("b");
+    bar.style.setProperty("--v", v / 100);
+    bar.dataset.l = v > 70 ? "bad" : v > 40 ? "warn" : "";
+    row.querySelector("em").textContent = Math.round(v) + "%";
+  });
+}
+
+function drawChart(cv, series) {
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if (!w || !h) return;
+  const dpr = Math.min(devicePixelRatio || 1, 3);
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const c = cv.getContext("2d");
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.clearRect(0, 0, w, h);
+  const top = 8, ih = h - top - 8;
+  c.lineWidth = 1; c.strokeStyle = "rgba(255,255,255,.08)";
+  for (const f of [0, .5, 1]) { const y = Math.round(top + ih * f) + .5; c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
+  const hist = health.hist;
+  if (!hist.length) return;
+  const span = HEALTH_SAMPLES * HEALTH_MS, end = hist[hist.length - 1].t;
+  c.lineJoin = "round"; c.lineCap = "round";
+  for (const s of series) {
+    /* a pause longer than a few samples (screen was closed) breaks the line instead of joining the two sides */
+    const runs = [];
+    for (const p of hist) {
+      const x = w - 4 - ((end - p.t) / span) * (w - 4);
+      if (x < -4) continue;
+      const pt = [x, top + ih * (1 - p[s.key] / 100)], run = runs[runs.length - 1];
+      if (run && p.t - run.t < HEALTH_MS * 3.5) { run.pts.push(pt); run.t = p.t; } else runs.push({ pts: [pt], t: p.t });
+    }
+    for (const { pts } of runs) {
+      if (pts.length < 2) continue;
+      const trace = () => {
+        c.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length - 1; i++) c.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
+        c.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+      };
+      if (s.fill) {
+        const g = c.createLinearGradient(0, top, 0, top + ih);
+        g.addColorStop(0, s.color + "55"); g.addColorStop(1, s.color + "00");
+        c.beginPath(); trace(); c.lineTo(pts[pts.length - 1][0], top + ih); c.lineTo(pts[0][0], top + ih); c.closePath();
+        c.fillStyle = g; c.fill();
+      }
+      c.beginPath(); trace();
+      c.lineWidth = 2; c.strokeStyle = s.color; c.stroke();
+    }
+  }
+}
+const drawHealthCharts = () => {
+  drawChart($("#cpuChart"), [{ key: "cpu", color: "#62c8ff", fill: true }]);
+  drawChart($("#memChart"), [{ key: "ram", color: "#8a84ff", fill: true }, { key: "swap", color: "#ffb547", fill: false }]);
+};
+addEventListener("resize", () => { if (health.shown && health.tab === "perf") drawHealthCharts(); });
+
+function paintHealth() {
+  if (!$("#screen-health").classList.contains("active")) return;
+  paintHealthPills();
+  const s = health.last;
+  $("#hNoData").hidden = health.ok !== false;
+  const verdict = $("#hVerdict");
+  verdict.hidden = !s || health.ok === false;
+  if (!s) return;
+  paintUsage();
+  if (health.tab === "procs") return paintProcs();
+  const v = healthVerdict(s);
+  verdict.className = "glass verdict " + v.level;
+  verdict.innerHTML = `<span class="v-ico"><svg viewBox="0 0 24 24" aria-hidden="true">${VERDICT_ICON[v.level]}</svg></span>
+    <div class="v-text"><b>${tr("health.v." + v.level)}</b><ul>${v.reasons.map(([k, vars]) => `<li>${esc(tr(k, vars))}</li>`).join("")}</ul></div>`;
+
+  const peak = Math.max(0, ...health.hist.map((p) => p.cpu));
+  $("#cpuNow").textContent = fmtPct(+s.cpu || 0);
+  $("#cpuMeta").textContent = [tr("health.peak", { n: Math.round(peak) }),
+    s.freqMhz != null ? (s.freqMhz >= 1000 ? nf1(s.freqMhz / 1000) + " GHz" : Math.round(s.freqMhz) + " MHz") : "",
+    s.tempC != null ? Math.round(s.tempC) + " °C" : ""].filter(Boolean).join(" · ");
+  paintCores(s.cores || []);
+
+  const ramPct = s.ramTotMb > 0 ? (s.ramUsedMb / s.ramTotMb) * 100 : 0;
+  const swapPct = s.swapTotMb > 0 ? (s.swapUsedMb / s.swapTotMb) * 100 : 0;
+  $("#ramNow").textContent = fmtPct(ramPct);
+  $("#memMeta").textContent = `${tr("health.swap")} ${fmtPct(swapPct)}`;
+  $("#stUsed").textContent = `${fmtMb(s.ramUsedMb)} / ${fmtMb(s.ramTotMb)}`;
+  $("#stAvail").textContent = fmtMb(s.ramAvailMb);
+  $("#stSwap").textContent = s.swapTotMb > 0 ? `${Math.round(s.swapUsedMb)} / ${fmtMb(s.swapTotMb)}` : "–";
+  $("#stCache").textContent = s.cacheMb != null ? fmtMb(s.cacheMb) : "–";
+  drawHealthCharts();
+}
+
+/* ----- processes ----- */
+const procTitle = (name) => usageTitle(usageKey(name));
+const SORT_COLS = [["name", "health.sortName", 1], ["pid", "health.sortPid", 1], ["cpu", "health.sortCpu", -1], ["ram", "health.sortMem", -1], ["user", "health.sortUser", 1]];
+const SORT_VAL = { name: (p) => p.title.toLowerCase(), pid: (p) => +p.pid || 0, cpu: (p) => +p.cpu || 0, ram: (p) => +p.ramMb || 0, user: (p) => String(p.user || "").toLowerCase() };
+function paintSortChips() {
+  const { key, dir } = health.sort;
+  $("#sortRow").innerHTML = SORT_COLS.map(([k, label]) => {
+    const on = k === key, name = tr(label);
+    return `<button class="sort-chip ${on ? "on" : ""}" data-sort="${k}" aria-pressed="${on}" aria-label="${esc(tr("health.sortAria", { name }))}">${esc(name)}${on ? `<i aria-hidden="true">${dir > 0 ? "↑" : "↓"}</i>` : ""}</button>`;
+  }).join("");
+}
+function setSort(k) {
+  const s = health.sort;
+  if (s.key === k) s.dir = -s.dir; else { s.key = k; s.dir = SORT_COLS.find((c) => c[0] === k)[2]; }
+  paintSortChips(); paintProcs();
+}
+function paintProcs() {
+  const s = health.last, list = $("#procList");
+  const q = health.q.trim().toLowerCase();
+  let rows = ((s && s.procs) || []).slice(0, 40).map((p) => ({ ...p, title: procTitle(p.name) }));
+  $("#procNote").textContent = tr("health.procNote", { n: rows.length });
+  if (q) rows = rows.filter((p) => `${p.title} ${p.name} ${p.pid} ${p.user || ""}`.toLowerCase().includes(q));
+  const { key, dir } = health.sort, val = SORT_VAL[key];
+  rows.sort((a, b) => {
+    const x = val(a), y = val(b);
+    return (typeof x === "string" ? x.localeCompare(y) : x - y) * dir;
+  });
+  list.innerHTML = rows.length ? rows.map((p) => `<div class="proc">
+      <div class="p-main"><b>${esc(p.title)}</b><small>${esc(p.name)} · PID ${esc(p.pid)}${p.user ? " · " + esc(p.user) : ""}</small></div>
+      <div class="p-nums"><b class="${p.cpu > 40 ? "hot" : ""}">${nf1(+p.cpu || 0)}%</b><small>${fmtMb(+p.ramMb || 0)}</small></div></div>`).join("")
+    : `<div class="proc empty"><small>${tr("health.noProcs")}</small></div>`;
+}
+$("#pSearch").addEventListener("input", (e) => { health.q = e.target.value; paintProcs(); });
+
+/* ----- what is using the CPU / memory: apps first, Android system apart ----- */
+const FRIENDLY = {
+  "com.gathin.tvhome": "Home screen", "app.glassremote.tv": "GlassRemote (TV app)", "com.mediatek.wwtv.tvcenter": "Live TV (TV center)",
+  "com.mediatek.wwtv.tvrecommendation": "TV inputs", "com.mediatek.tvinput": "TV inputs service", "com.mediatek.tv.agent": "TV system agent",
+  "com.mediatek.tv.freeviewplay": "Freeview Play", "com.mediatek.hotkey.dispatcher": "Remote keys", "com.mstar.netflixobserver": "Netflix helper",
+  "com.google.android.katniss": "Google Assistant", "com.android.vending": "Google Play Store", "com.google.android.inputmethod.latin": "Gboard keyboard",
+  "com.google.process.gapps": "Google services", "com.google.android.gms": "Google Play services", "com.google.android.apps.mediashell": "Chromecast built-in",
+  "com.google.android.tv.remote.service": "Android TV Remote service", "com.android.systemui": "System UI", "com.android.tv.settings": "TV settings",
+  "com.android.providers.tv": "TV provider", "com.android.bluetooth": "Bluetooth", "android.process.media": "Media storage", "com.android.keychain": "Keychain",
+  "app_process": "ADB helper (app_process)", "adbd": "ADB service", "com.google.android.tvrecommendations": "Recommendations",
+  "com.google.android.gsf": "Google Services Framework", "com.google.android.webview": "Android System WebView", "kernel": "Linux kernel",
+};
+/* always listed as apps / always listed as Android system, whatever user they run as */
+const APP_FORCE = new Set(["app.glassremote.tv", "com.gathin.tvhome", "com.google.process.gapps", "com.google.android.katniss", "com.google.android.gms",
+  "com.android.vending", "com.google.android.inputmethod.latin"]);
+const SYS_NAMES = new Set(["app_process", "adbd", "system_server", "surfaceflinger", "zygote", "zygote64", "wpf_browser", "dtv_svc", "android.process.media"]);
+const SYS_PATTERN = /^(com\.mediatek\.|com\.mstar\.|android\.hardware\.|com\.android\.(providers\.|systemui$|bluetooth$|keychain$|tv\.settings$))/;
+const KERNEL_THREAD = /^(kworker|ksoftirqd|migration|irq|cpuhp|rcu_\w+|kthreadd|kswapd\d*|watchdog)\b/;
+/* a readable name is only derived for something that looks like an Android package */
+const looksLikePackage = (n) => /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(n);
+/* "com.google.android.katniss:search" -> "com.google.android.katniss"; every Play services process counts as one app */
+function usageKey(name) {
+  const n = String(name || "");
+  if (n.startsWith("[") || KERNEL_THREAD.test(n)) return "kernel";
+  let b = n.split(":")[0];
+  if (b.startsWith("/")) b = b.split("/").pop();
+  return /^com\.google\.android\.gms(\.|$)/.test(b) ? "com.google.android.gms" : b;
+}
+function isAppProc(p, key) {
+  const u = String(p.user || "");
+  if (key === "kernel") return false;
+  if (knownApp(key) || APP_FORCE.has(key)) return true;
+  if (SYS_NAMES.has(key) || SYS_PATTERN.test(key)) return false;
+  if (/^u\d+_/.test(u)) return true;
+  if (u) return false;
+  return looksLikePackage(key);
+}
+function usageTitle(key) {
+  const a = knownApp(key);
+  if (a) return a.name;
+  if (FRIENDLY[key]) return FRIENDLY[key];
+  if (SYSTEM_APPS[key]) return tr(SYSTEM_APPS[key]);
+  if (!looksLikePackage(key)) return key;
+  return key.split(".").pop().replace(/_+/g, " ").replace(/^./, (c) => c.toUpperCase());
+}
+const knownApp = (key) => APPS.find((a) => a.pkg === key) || state.customApps.find((a) => a.pkg === key);
+const GEAR_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>';
+function usageGroups(s, kind) {
+  const field = kind === "cpu" ? "cpu" : "ramMb";
+  const list = kind === "cpu" ? s.procs || [] : s.memProcs || s.procs || [];
+  const map = new Map();
+  for (const p of list) {
+    const key = usageKey(p.name);
+    let g = map.get(key);
+    if (!g) map.set(key, (g = { key, val: 0, procs: [], app: false }));
+    g.val += +p[field] || 0; g.procs.push(p); g.app = g.app || isAppProc(p, key);
+  }
+  const all = [...map.values()].sort((a, b) => b.val - a.val);
+  return { field, apps: all.filter((g) => g.app), sys: all.filter((g) => !g.app), max: Math.max(0.0001, ...all.map((g) => g.val)) };
+}
+function paintUsage(force) {
+  const u = health.usage, sheet = $("#detailSheet"), s = health.last;
+  if (!u || sheet.hidden || !s) return;
+  /* do not rebuild the list under the finger or while it is still scrolling */
+  if (!force && (u.touching || Date.now() - u.scrolled < 400)) return;
+  const { field, apps: allApps, sys: allSys, max } = usageGroups(s, u.kind);
+  /* top reports CPU in coarse steps, so many rows sit at 0: they stay behind a toggle */
+  const isIdle = (g) => u.kind === "cpu" && g.val <= 0;
+  const idleN = allApps.filter(isIdle).length + allSys.filter(isIdle).length;
+  const apps = u.idle ? allApps : allApps.filter((g) => !isIdle(g)), sys = u.idle ? allSys : allSys.filter((g) => !isIdle(g));
+  const fmt = (v) => (u.kind === "cpu" ? nf1(v) + "%" : fmtMb(v));
+  const item = (g) => {
+    const open = u.open.has(g.key), title = usageTitle(g.key), info = knownApp(g.key);
+    const icon = !g.app ? `<i class="sys">${GEAR_ICON}</i>` : appLogo(info || { name: title, glyph: (title[0] || "?").toUpperCase(), bg: appInfo(g.key).bg, fg: appInfo(g.key).fg });
+    const rows = open ? `<div class="dt-procs">${[...g.procs].sort((a, b) => (+b[field] || 0) - (+a[field] || 0))
+      .map((p) => `<div class="dt-p"><span>${esc(p.name)}</span><small>PID ${esc(p.pid)}</small><b>${fmt(+p[field] || 0)}</b></div>`).join("")}</div>` : "";
+    return `<div class="dt-item ${open ? "open" : ""}"><button class="dt-row" data-dt="${esc(g.key)}" aria-expanded="${open}">${icon}
+      <span class="dt-main"><b>${esc(title)}</b><small>${trn("health.detailProcs", g.procs.length)}</small><span class="dt-bar ${u.kind}"><b style="--v:${(g.val / max).toFixed(3)}"></b></span></span>
+      <span class="dt-val">${fmt(g.val)}</span><svg class="dt-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>${rows}</div>`;
+  };
+  const group = (key, list) => (list.length ? `<div class="dt-head"><span>${tr(key)}</span><b>${fmt(list.reduce((a, g) => a + g.val, 0))}</b></div><div class="dt-list">${list.map(item).join("")}</div>` : "");
+  $("#dtTitle").textContent = tr(u.kind === "cpu" ? "health.detailCpu" : "health.detailMem");
+  const body = $("#dtBody"), st = body.scrollTop;
+  body.innerHTML = `<p class="hint">${tr("health.detailTap")}</p>${u.kind === "cpu" ? `<p class="hint">${tr("health.detailIdleHint")}</p>` : ""}` +
+    `${group("health.detailApps", apps)}${group("health.detailSystem", sys)}` +
+    (idleN ? `<button class="link center dt-idle" data-dt-idle aria-expanded="${!!u.idle}">${tr(u.idle ? "health.detailIdleHide" : "health.detailIdleShow", { n: idleN })}</button>` : "") +
+    (apps.length || sys.length || idleN ? "" : `<p class="hint">${tr("health.noProcs")}</p>`) +
+    (u.kind === "mem" ? `<p class="hint dt-note">${tr("health.detailShared")}</p>` : "");
+  if (body.scrollTop !== st) body.scrollTop = st;
+}
+function openUsage(kind) {
+  health.usage = { kind, open: new Set(), touching: false, scrolled: 0, idle: false };
+  openSheet("detailSheet");
+  $("#dtBody").scrollTop = 0;
+  paintUsage(true);
+}
+$("#dtBody").addEventListener("pointerdown", () => { if (health.usage) health.usage.touching = true; });
+["pointerup", "pointercancel"].forEach((ev) => document.addEventListener(ev, () => { if (health.usage) health.usage.touching = false; }, true));
+$("#dtBody").addEventListener("scroll", () => { if (health.usage) health.usage.scrolled = Date.now(); }, { passive: true });
+$("#dtBody").addEventListener("click", (e) => {
+  const u = health.usage;
+  if (!u) return;
+  if (e.target.closest("[data-dt-idle]")) { u.idle = !u.idle; return paintUsage(true); }
+  const row = e.target.closest("[data-dt]");
+  if (!row) return;
+  const k = row.dataset.dt;
+  u.open.has(k) ? u.open.delete(k) : u.open.add(k);
+  paintUsage(true);
+});
+$("#dtDone").addEventListener("click", () => closeSheets());
+
+function setHealthTab(tab) {
+  health.tab = tab;
+  $$("#healthSeg button").forEach((b) => { const on = b.dataset.htab === tab; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+  $("#healthPerf").hidden = tab !== "perf";
+  $("#healthProcs").hidden = tab !== "procs";
+  refreshLenses(); paintHealth(); paintMaint();
+}
+
+/* ----- maintenance: clean cache and automatic restart ----- */
+async function loadMaint() {
+  try { applyMaint(await healthSource().getMaintenance()); health.maintErr = false; }
+  catch (e) { if (!health.maint) health.maintErr = true; if (e && e.status === 401) onUnauthorized(); }
+  paintMaint();
+}
+function applyMaint(r) {
+  const tz = Number.isFinite(+r.tzOffsetMin) && r.tzOffsetMin != null ? Math.round(+r.tzOffsetMin) : phoneOffsetMin();
+  health.maint = { cfg: normReboot(r.reboot), last: +r.lastRebootMs || 0, next: +r.nextRebootMs || 0, note: String(r.note || ""), tz };
+}
+function paintDays() {
+  const c = health.maint.cfg;
+  $("#mDayBox").hidden = c.freq === "daily";
+  if (c.freq === "daily") return;
+  const f = new Intl.DateTimeFormat(i18n.lang, { weekday: "short" });
+  const items = c.freq === "weekly" ? [1, 2, 3, 4, 5, 6, 7].map((i) => [i, f.format(new Date(2024, 0, i))]) : Array.from({ length: 28 }, (_, i) => [i + 1, String(i + 1)]);
+  $("#mDays").className = "day-grid " + c.freq;
+  $("#mDays").innerHTML = items.map(([v, l]) => `<button data-day="${v}" aria-pressed="${v === c.day}">${esc(l)}</button>`).join("");
+}
+function paintMaint() {
+  const m = health.maint;
+  $("#mLoading").hidden = !!m || health.maintErr;
+  $("#mLoadErr").hidden = !health.maintErr || !!m;
+  $("#mWrap").hidden = !m;
+  if (!m) return;
+  const c = m.cfg;
+  $("#mSwitch").setAttribute("aria-checked", c.enabled);
+  $("#mGroup").classList.toggle("off", !c.enabled);
+  $$("#mFreq button").forEach((b) => { const on = b.dataset.freq === c.freq; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+  paintDays();
+  $("#mTime").value = `${pad2(c.hour)}:${pad2(c.minute)}`;
+  $("#mLast").textContent = m.last ? fmtWhen(m.last, m.tz) : tr("health.never");
+  $("#mNext").textContent = c.enabled && m.next ? fmtWhen(m.next, m.tz) : "–";
+  $("#mTvClockRow").hidden = m.tz === phoneOffsetMin();
+  $("#mNote").textContent = m.note;
+  $("#mNoteRow").hidden = !m.note;
+  $("#mNote").hidden = !m.note;
+  refreshLenses();
+}
+async function saveMaint() {
+  if (!health.maint || health.saving) return;
+  health.saving = true; $("#mSave").disabled = true;
+  try { applyMaint(await healthSource().setMaintenance(health.maint.cfg)); paintMaint(); toast(tr("health.saved")); }
+  catch (e) { toast(tr("health.saveFail")); if (e && e.status === 401) onUnauthorized(); }
+  health.saving = false; $("#mSave").disabled = false;
+}
+function setCleaning(on) {
+  health.cleaning = on;
+  $("#cacheBtn").disabled = on;
+  $("#cacheSpin").hidden = !on;
+  $("#cacheLbl").textContent = tr(on ? "health.cleaning" : "health.cleanBtn");
+}
+async function runClean() {
+  if (health.cleaning) return;
+  setCleaning(true);
+  try {
+    const r = await healthSource().cleanCache();
+    const n = Math.max(0, Math.round(+r.freedMb || 0));
+    toast(n ? tr("health.freed", { n }) : tr("health.freedNone"));
+    healthPoll();
+  } catch (e) { toast(tr("health.cleanFail")); if (e && e.status === 401) onUnauthorized(); }
+  setCleaning(false);
+}
+const editReboot = (patch) => { if (!health.maint) return; health.maint.cfg = normReboot({ ...health.maint.cfg, ...patch }); paintMaint(); };
+
+$("#screen-health").addEventListener("click", (e) => {
+  const t = e.target;
+  let el;
+  if (t.closest("#healthBack")) return go("settings");
+  if ((el = t.closest("[data-htab]"))) return setHealthTab(el.dataset.htab);
+  if ((el = t.closest("[data-sort]"))) return setSort(el.dataset.sort);
+  if (t.closest("#cacheBtn")) return openSheet("cacheSheet");
+  if (t.closest("#mSwitch")) return editReboot({ enabled: !health.maint.cfg.enabled });
+  if ((el = t.closest("[data-freq]"))) return editReboot({ freq: el.dataset.freq });
+  if ((el = t.closest("[data-day]"))) return editReboot({ day: +el.dataset.day });
+  if (t.closest("#mSave")) return saveMaint();
+  if (t.closest("#mRetry")) { health.maintErr = false; paintMaint(); return loadMaint(); }
+  if ((el = t.closest("[data-detail]"))) return openUsage(el.dataset.detail);
+});
+$("#screen-health").addEventListener("keydown", (e) => {
+  const el = e.target.closest && e.target.closest("[data-detail]");
+  if (el && el === e.target && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openUsage(el.dataset.detail); }
+});
+$("#mTime").addEventListener("change", (e) => {
+  const [h, m] = e.target.value.split(":").map(Number);
+  if (Number.isFinite(h) && Number.isFinite(m)) editReboot({ hour: h, minute: m });
+});
+$("#cacheGo").addEventListener("click", () => { closeSheets(); runClean(); });
+$("#cacheNo").addEventListener("click", () => closeSheets());
+$("#healthBtn").addEventListener("click", () => go("health"));
+
+function paintHealthAll() {
+  paintSortChips(); paintHealth(); paintMaint(); paintUsage(true); renderRecent();
+  if (!health.cleaning) $("#cacheLbl").textContent = tr("health.cleanBtn");
+}
+
+/* ---------- open a link on the TV ---------- */
+const LINK_KEY = "recentLinks";
+const link = { busy: false, recent: store.get(LINK_KEY, []).filter((x) => typeof x === "string").slice(0, 3) };
+function normalizeLink(raw) {
+  let v = String(raw || "").trim();
+  if (!v || /\s/.test(v)) return null;
+  const hasScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(v) || /^(mailto|javascript|data|file|tel|sms|intent|market):/i.test(v);
+  if (!hasScheme && v.includes(".")) v = "https://" + v;
+  try { const u = new URL(v); return (u.protocol === "http:" || u.protocol === "https:") && u.hostname ? v : null; } catch { return null; }
+}
+function linkLabel(url) {
+  try {
+    const u = new URL(url);
+    const t = u.host.replace(/^www\./, "") + (u.pathname + u.search).replace(/^\/$/, "");
+    return t.length > 32 ? t.slice(0, 31) + "…" : t;
+  } catch { return url.slice(0, 32); }
+}
+function renderRecent() {
+  const box = $("#linkRecent");
+  box.hidden = !link.recent.length;
+  box.innerHTML = link.recent.length
+    ? `<span class="link-lbl">${tr("openlink.recent")}</span>` + link.recent.map((u, i) => `<button class="sort-chip link-chip" data-recent="${i}" title="${esc(u)}"><span>${esc(linkLabel(u))}</span></button>`).join("")
+    : "";
+}
+function updateLinkBtn() { $("#linkGo").disabled = link.busy || !$("#linkUrl").value.trim(); }
+function setLinkBusy(on) {
+  link.busy = on;
+  $("#linkSpin").hidden = !on;
+  $("#linkLbl").textContent = tr(on ? "openlink.sending" : "openlink.open");
+  updateLinkBtn();
+}
+async function sendLink() {
+  if (link.busy) return;
+  const url = normalizeLink($("#linkUrl").value);
+  if (!url) return toast(tr("openlink.notWeb"));
+  setLinkBusy(true);
+  try {
+    await healthSource().openLink(url);
+    link.recent = [url, ...link.recent.filter((x) => x !== url)].slice(0, 3);
+    try { store.set(LINK_KEY, link.recent); } catch { /* private mode */ }
+    renderRecent();
+    $("#linkUrl").value = "";
+    toast(tr("openlink.opened"));
+  } catch (e) {
+    if (e && e.status === 401) onUnauthorized();
+    else if (e && (e.status === 400 || (e.body && e.body.message === "invalid_link"))) toast(tr("openlink.notWeb"));
+    else toast(tr("openlink.unreachable"));
+  }
+  setLinkBusy(false);
+}
+$("#linkUrl").addEventListener("input", updateLinkBtn);
+$("#linkUrl").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); if (!$("#linkGo").disabled) sendLink(); } });
+$("#linkGo").addEventListener("click", sendLink);
+$("#linkPaste").addEventListener("click", async () => {
+  const input = $("#linkUrl");
+  try {
+    const t = (await navigator.clipboard.readText()).trim();
+    if (!t) return input.focus();
+    input.value = t; updateLinkBtn();
+  } catch { input.focus(); }
+});
+$("#linkRecent").addEventListener("click", (e) => {
+  const c = e.target.closest("[data-recent]");
+  if (!c) return;
+  $("#linkUrl").value = link.recent[+c.dataset.recent] || ""; updateLinkBtn();
+});
+renderRecent();
 
 /* ---------- start ---------- */
 refreshSceneApps(); renderSiri();

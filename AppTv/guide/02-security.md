@@ -43,6 +43,18 @@ For that, **network debugging** must be ON in the TV's Developer options. The tr
 - **Private addresses only.** Only devices on your home network (private addresses) can connect.
 - **Same PIN until reset.** The PIN, port and tokens stay until you clear the app data.
 
+## What the 0.5.0 features add
+
+- **Key helper.** For fast keys the TV app starts a small helper (class `app.glassremote.tv.Injector`, inside the same APK) with `app_process` as the ADB shell user, over a second ADB connection to the TV's own loopback address. It reads key codes from its standard input. It opens **no network socket** and no new port. It stops after 10 minutes without keys and exits when the app or the connection closes. If it cannot start, the app falls back to `input keyevent`.
+- **New endpoints, all behind the token.** `GET /api/stats` (read-only health figures), `POST /api/clean-cache` (`pm trim-caches`, temporary files only, at most once every 10 seconds), `GET`/`PUT /api/maintenance` (the restart schedule) and `POST /api/open-link` (see below). Like every other command, they ignore a phone without a valid token.
+- **Restart only in standby.** The automatic restart is off by default, only runs when the TV is asleep or dozing, never twice within 12 hours and never within 10 minutes of boot. A wrong clock cannot trigger it in a loop.
+- **Links and apps.** The **Open a link on the TV** card sends the link to `POST /api/open-link` (JSON `{"url":"..."}`, behind the token; it answers 200 `{"ok":true}`, 400 `invalid_link`, 405 for a non-POST request, 401 without a token and 503 when the TV is unreachable). The allowlist applies to this endpoint and to opening apps: only `http`/`https` links with a host are accepted (no `file:`, `content:`, `intent:`, `market:` or `javascript:`), apps must have a valid package name, and the link opens with the `BROWSABLE` category. It opens links only: it cannot send files or cast photos or videos.
+- **Errors** return fixed codes, not exception text.
+
+What a phone that has the PIN (and so a token) can do: press keys, open links and apps (a link can also wake the TV from standby), read the health figures and the process list, clean the apps' cache, and set or switch off the automatic restart. It still cannot run arbitrary shell commands. Keep the PIN and the QR code private, as before.
+
+Known and unchanged: the TV web server does not check the `Host`/`Origin` of the WebSocket (the PIN lock-outs limit guessing; this may be added in a later release), and the traffic is plain HTTP on the home network, the trade-off described above. More in [../../SECURITY-AUDIT.md](../../SECURITY-AUDIT.md).
+
 ## What to do
 
 1. Keep **Network debugging** off when you do not need the remote, or at least be careful about what you approve.
@@ -75,4 +87,4 @@ Remove IP and MAC addresses, TV names, Wi-Fi names, user names in paths, and any
 
 Please open a **private security advisory** on GitHub (*Security*, *Report a vulnerability*) in this repository, not a public issue. Describe what you found and how to reproduce it. Do not include your own PIN, tokens or addresses.
 
-See also: [01-install-on-your-tv.md](01-install-on-your-tv.md), [03-troubleshooting.md](03-troubleshooting.md).
+See also: [01-install-on-your-tv.md](01-install-on-your-tv.md), [03-troubleshooting.md](03-troubleshooting.md), [05-health-and-maintenance.md](05-health-and-maintenance.md).

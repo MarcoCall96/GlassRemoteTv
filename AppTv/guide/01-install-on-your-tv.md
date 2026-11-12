@@ -8,7 +8,7 @@ Before you start, read [02-security.md](02-security.md) once. The app needs **ne
 
 **You need:**
 
-- an Android TV or Google TV (Android 5 or newer) that you own;
+- an Android TV or Google TV that you own, with **Network debugging** in Developer options (tested on Android 10 only, see [06-tested-tvs.md](06-tested-tvs.md); Android 11 and newer are untested);
 - an iPhone or an Android phone;
 - the TV and the phone on the same home Wi-Fi (phone VPN off).
 
@@ -18,12 +18,12 @@ Samsung (Tizen), LG (webOS), Roku, Fire TV and Apple TV are not supported.
 
 This step is for the USB stick and adb methods (B and C). With the Downloader app (method A) you download nothing now: the TV downloads the file itself in step 2, over HTTPS, from the official release address. In that case skip to step 2.
 
-1. Open the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases) and download `GlassRemoteTv-0.4.1.apk`. The same file is also in this repository: [../release/GlassRemoteTv-0.4.1.apk](../release/GlassRemoteTv-0.4.1.apk).
+1. Open the [Releases page](https://github.com/MarcoCall96/GlassRemoteTv/releases) and download `GlassRemoteTv-0.5.0.apk`. The same file is also in this repository: [../release/GlassRemoteTv-0.5.0.apk](../release/GlassRemoteTv-0.5.0.apk).
 2. Check it. The SHA-256 must match [../release/SHA256SUMS.txt](../release/SHA256SUMS.txt):
-   - Windows: `Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.4.1.apk`
-   - macOS / Linux: `shasum -a 256 GlassRemoteTv-0.4.1.apk`
+   - Windows: `Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.5.0.apk`
+   - macOS / Linux: `shasum -a 256 GlassRemoteTv-0.5.0.apk`
 
-The TV cannot check a checksum, so with the Downloader app that check is skipped on the TV. If an AI assistant is helping you, it can check `release/GlassRemoteTv-0.4.1.apk` against `release/SHA256SUMS.txt` from the repository files for you.
+The TV cannot check a checksum, so with the Downloader app that check is skipped on the TV. If an AI assistant is helping you, it can check `release/GlassRemoteTv-0.5.0.apk` against `release/SHA256SUMS.txt` from the repository files for you.
 
 ## Step 2. Install it on the TV
 
@@ -33,7 +33,7 @@ Pick one method.
 
 1. On the TV, open the **Google Play Store**, search for **Downloader** (by AFTVnews) and install it.
 2. Open Downloader. The first time it asks for permission to access media and files: choose **Allow**.
-3. In the URL field, type the direct link to the APK, then press **Go**: `https://github.com/MarcoCall96/GlassRemoteTv/releases/download/v0.4.1/GlassRemoteTv-0.4.1.apk`. If that link does not work, use this one: `https://github.com/MarcoCall96/GlassRemoteTv/raw/main/AppTv/release/GlassRemoteTv-0.4.1.apk`.
+3. In the URL field, type the direct link to the APK, then press **Go**: `https://github.com/MarcoCall96/GlassRemoteTv/releases/download/v0.5.0/GlassRemoteTv-0.5.0.apk`. If that link does not work, use this one: `https://github.com/MarcoCall96/GlassRemoteTv/raw/main/AppTv/release/GlassRemoteTv-0.5.0.apk`.
 4. When the download ends, choose **Install**.
 5. If the TV says it cannot install unknown apps, allow **Install unknown apps** for Downloader (Settings > Device Preferences > Security & restrictions > Unknown sources; menu names vary by TV brand), then try again.
 
@@ -41,7 +41,7 @@ Typing a long link with the TV remote is slow and must be exact. If it is too te
 
 ### Method B: USB stick
 
-1. Copy `GlassRemoteTv-0.4.1.apk` to a USB stick.
+1. Copy `GlassRemoteTv-0.5.0.apk` to a USB stick.
 2. Plug the stick into the TV and open a file manager app on the TV.
 3. Select the APK and choose **Install**. Allow **Install unknown apps** for the file manager if asked.
 
@@ -52,7 +52,7 @@ Typing a long link with the TV remote is slow and must be exact. If it is too te
 
 ```
 adb connect 192.168.x.x:5555
-adb install GlassRemoteTv-0.4.1.apk
+adb install GlassRemoteTv-0.5.0.apk
 ```
 
 Replace `192.168.x.x` with the TV address (TV Settings, Network). The TV will ask you to allow this computer. Tick **Always allow from this computer** only for your own computer, then press **Allow**.

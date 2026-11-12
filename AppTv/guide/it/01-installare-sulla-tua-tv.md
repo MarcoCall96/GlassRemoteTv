@@ -8,7 +8,7 @@ Prima di iniziare leggi una volta [02-sicurezza.md](02-sicurezza.md). L'app ha b
 
 **Ti serve:**
 
-- una Android TV o Google TV (Android 5 o successivo) che è tua;
+- una Android TV o Google TV che è tua, con il **Debug di rete** nelle Opzioni sviluppatore (provata solo su Android 10, vedi [06-tv-testate.md](06-tv-testate.md); Android 11 e successive non sono state provate);
 - un iPhone o un telefono Android;
 - la TV e il telefono sullo stesso Wi-Fi di casa (VPN del telefono spenta).
 
@@ -18,12 +18,12 @@ Samsung (Tizen), LG (webOS), Roku, Fire TV e Apple TV non sono supportate.
 
 Questo passo vale per i metodi chiavetta USB e adb (B e C). Con l'app Downloader (metodo A) ora non scarichi nulla: è la TV a scaricare il file da sola al passo 2, via HTTPS, dall'indirizzo ufficiale della release. In quel caso vai al passo 2.
 
-1. Apri la [pagina Releases](https://github.com/MarcoCall96/GlassRemoteTv/releases) e scarica `GlassRemoteTv-0.4.1.apk`. Lo stesso file è anche nel repository: [../../release/GlassRemoteTv-0.4.1.apk](../../release/GlassRemoteTv-0.4.1.apk).
+1. Apri la [pagina Releases](https://github.com/MarcoCall96/GlassRemoteTv/releases) e scarica `GlassRemoteTv-0.5.0.apk`. Lo stesso file è anche nel repository: [../../release/GlassRemoteTv-0.5.0.apk](../../release/GlassRemoteTv-0.5.0.apk).
 2. Controllalo. Lo SHA-256 deve coincidere con [../../release/SHA256SUMS.txt](../../release/SHA256SUMS.txt):
-   - Windows: `Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.4.1.apk`
-   - macOS / Linux: `shasum -a 256 GlassRemoteTv-0.4.1.apk`
+   - Windows: `Get-FileHash -Algorithm SHA256 GlassRemoteTv-0.5.0.apk`
+   - macOS / Linux: `shasum -a 256 GlassRemoteTv-0.5.0.apk`
 
-La TV non può controllare una somma di controllo, quindi con l'app Downloader quel controllo sulla TV viene saltato. Se ti aiuta un assistente AI, può confrontare `release/GlassRemoteTv-0.4.1.apk` con `release/SHA256SUMS.txt` usando i file del repository.
+La TV non può controllare una somma di controllo, quindi con l'app Downloader quel controllo sulla TV viene saltato. Se ti aiuta un assistente AI, può confrontare `release/GlassRemoteTv-0.5.0.apk` con `release/SHA256SUMS.txt` usando i file del repository.
 
 ## Passo 2. Installala sulla TV
 
@@ -33,7 +33,7 @@ Scegli un metodo.
 
 1. Sulla TV apri il **Google Play Store**, cerca **Downloader** (di AFTVnews) e installala.
 2. Apri Downloader. La prima volta chiede il permesso di accedere a contenuti multimediali e file: scegli **Consenti**.
-3. Nel campo URL scrivi il link diretto all'APK, poi premi **Vai**: `https://github.com/MarcoCall96/GlassRemoteTv/releases/download/v0.4.1/GlassRemoteTv-0.4.1.apk`. Se quel link non funziona, usa questo: `https://github.com/MarcoCall96/GlassRemoteTv/raw/main/AppTv/release/GlassRemoteTv-0.4.1.apk`.
+3. Nel campo URL scrivi il link diretto all'APK, poi premi **Vai**: `https://github.com/MarcoCall96/GlassRemoteTv/releases/download/v0.5.0/GlassRemoteTv-0.5.0.apk`. Se quel link non funziona, usa questo: `https://github.com/MarcoCall96/GlassRemoteTv/raw/main/AppTv/release/GlassRemoteTv-0.5.0.apk`.
 4. Quando il download finisce, scegli **Installa**.
 5. Se la TV dice che non può installare app sconosciute, consenti **Installa app sconosciute** a Downloader (Impostazioni > Preferenze dispositivo > Sicurezza e limitazioni > Origini sconosciute; i nomi dei menu cambiano da marca a marca) e riprova.
 
@@ -41,7 +41,7 @@ Scrivere un link lungo con il telecomando è lento e deve essere esatto. Se è t
 
 ### Metodo B: chiavetta USB
 
-1. Copia `GlassRemoteTv-0.4.1.apk` su una chiavetta USB.
+1. Copia `GlassRemoteTv-0.5.0.apk` su una chiavetta USB.
 2. Inserisci la chiavetta nella TV e apri un'app di gestione file sulla TV.
 3. Seleziona l'APK e scegli **Installa**. Consenti **Installa app sconosciute** alla app di gestione file se richiesto.
 
@@ -52,7 +52,7 @@ Scrivere un link lungo con il telecomando è lento e deve essere esatto. Se è t
 
 ```
 adb connect 192.168.x.x:5555
-adb install GlassRemoteTv-0.4.1.apk
+adb install GlassRemoteTv-0.5.0.apk
 ```
 
 Sostituisci `192.168.x.x` con l'indirizzo della TV (Impostazioni della TV, Rete). La TV ti chiederà di consentire questo computer. Spunta **Consenti sempre da questo computer** solo per un computer tuo, poi premi **Consenti**.

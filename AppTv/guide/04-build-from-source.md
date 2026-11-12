@@ -65,9 +65,19 @@ The one-time ADB approval and the saved phones are kept, because the signing key
 
 More simultaneous connections use more TV memory. Raise the numbers only as much as you need.
 
+Other small constants, if you want to change the behaviour of the 0.5.0 features (change, rebuild, install again):
+
+| Constant | File | What it sets |
+|---|---|---|
+| restart retry 30 min, give-up 6 h, minimum gap 12 h | `tv-app/src/app/glassremote/tv/Maintenance.java` | How the automatic restart retries and how often it can run |
+| cache-clean interval 10 s, stats cache 2 s | `tv-app/src/app/glassremote/tv/TvLink.java` | How often the cache can be cleaned, and how long a health reading is reused |
+| `IDLE_MS` (10 minutes) | `tv-app/src/app/glassremote/tv/KeyInjector.java` | When the key helper stops after the last key |
+
 ## Tests
 
-The tests cover the PIN logic (`Auth.java`): right and wrong PIN, the per-address lock, the new PIN after too many tries, the saved port. They run on a normal JDK, with two small stubs instead of the Android classes.
+There are two test programs. They run on a normal JDK. Every output line must start with `PASS`.
+
+`AuthTest` covers the PIN logic (`Auth.java`): right and wrong PIN, the per-address lock, the new PIN after too many tries, the saved port. It uses two small stubs instead of the Android classes.
 
 In `tv-app/tests`:
 
@@ -78,7 +88,23 @@ javac -d ..\build\authtest stubs\android\content\Context.java stubs\android\util
 java -cp ..\build\authtest app.glassremote.tv.AuthTest
 ```
 
+`FeaturesTest` (51 checks) covers the restart schedule maths (including daylight saving), the config validation, the load-figure parser and the link allowlist:
+
+```powershell
+cd tv-app
+$out = "build\featurestest"
+New-Item -ItemType Directory $out -Force | Out-Null
+javac -d $out src\app\glassremote\tv\Schedule.java src\app\glassremote\tv\Stats.java src\app\glassremote\tv\Links.java tests\FeaturesTest.java
+java -cp $out app.glassremote.tv.FeaturesTest
+```
+
 Expect every line of the output to start with `PASS`. If a line starts with anything else, something is broken.
+
+## How the key helper works
+
+1. When a phone connects, the TV app opens a second ADB connection to its own loopback address and starts `app_process` with the class `app.glassremote.tv.Injector` (from the same APK) as the ADB shell user.
+2. `KeyInjector.java` writes one key code per line to the helper's standard input; the helper injects the key. There is no network socket. It takes about 10 ms from the phone message to the key, instead of about 1000 ms for `input keyevent`.
+3. The helper stops after 10 minutes without keys (it holds about 60 MB of RAM), exits when the app or the connection closes, and if it cannot start the app falls back to `input keyevent`.
 
 ## Source map
 
@@ -88,21 +114,25 @@ All Java files are in `tv-app/src/app/glassremote/tv/`.
 |---|---|
 | `MainActivity.java` | The TV screen: QR code, address, PIN and status |
 | `Qr.java` | Small QR code generator (byte mode, level M) |
-| `Server.java` | HTTP and WebSocket server on the saved random port; serves the web app and handles the phone commands |
+| `Server.java` | HTTP and WebSocket server on the saved random port; serves the web app and handles the phone commands (including `/api/stats`, `/api/clean-cache`, `/api/maintenance`, `/api/open-link`) |
 | `Auth.java` | The PIN, the tokens, the saved port and the brute-force lock |
-| `TvLink.java` | Talks to the TV: keys, volume, apps, status |
-| `Adb.java`, `Identity.java` | Minimal ADB client and its RSA identity |
+| `TvLink.java` | Talks to the TV: keys, volume, apps, status, health reading, cache cleaning |
+| `Adb.java`, `Identity.java` | Minimal ADB client (with a long-lived stream and a longer-timeout exec) and its RSA identity |
+| `Injector.java`, `KeyInjector.java` | The key helper that runs as the ADB shell user, and the TV-side part that starts it and feeds it |
+| `Stats.java` | Parses the health reading (`/proc/stat`, `/proc/meminfo`, `loadavg`, `uptime`, `top`, `ps`) |
+| `Schedule.java`, `Maintenance.java` | The automatic restart: schedule maths and validation, and the saved config (`maintenance.txt`) and its checks |
+| `Links.java` | The allowlist for "open a link on the TV" (`POST /api/open-link`, handled in `Server.java` and `TvLink.java`) and the package-name check |
 | `ReceiverService.java`, `BootReceiver.java` | Keep the app running in the background and start it when the TV boots |
 
 Other places:
 
 | Path | What it holds |
 |---|---|
-| `docs/` | The phone web app (plain HTML, CSS, JavaScript) bundled in the APK |
+| `docs/` | The phone web app (plain HTML, CSS, JavaScript) bundled in the APK, including the TV health screen |
 | `tv-app/res/` | Icon and TV banner |
 | `tv-app/AndroidManifest.xml` | Permissions, launcher entry, service, boot receiver |
 | `tv-app/build.ps1` | The build script |
-| `tv-app/tests/` | `AuthTest.java` and the stubs |
+| `tv-app/tests/` | `AuthTest.java`, `FeaturesTest.java` and the stubs |
 | `tv-app/tools/hold-key/` | `Hold.java`, a helper that holds a key down on the TV (used by the AI-assistant instructions) |
 
 ## Rule when you change the web app

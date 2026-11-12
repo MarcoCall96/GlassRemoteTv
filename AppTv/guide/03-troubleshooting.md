@@ -74,6 +74,51 @@ Each item reads: **symptom**, then **cause**, then **fix**.
 - **Cause:** the Safari tab and the Home Screen icon have separate storage.
 - **Fix:** type the PIN once in the installed app. You need to do it only once.
 
+## The keys feel slow
+
+- **Cause:** the key helper is not running, so each key goes through the slow `input keyevent` path (about 1 second per key). The helper starts when a phone connects, so the very first key can still be slow (about 1 second), and it stops after 10 minutes without keys: the first key after a long pause is slow again.
+- **Fix:** check that **Network debugging** is on (the helper needs the second ADB connection). If the helper cannot start, the app falls back to the slow path by itself, so the remote keeps working. Press a few keys and they should speed up. See [05-health-and-maintenance.md](05-health-and-maintenance.md).
+
+## I do not see the TV health screen
+
+- **Cause:** the screen is only shown when the TV app answers. It is not there with the computer receiver, and an old TV app (before 0.5.0) does not have it.
+- **Fix:** install GlassRemoteTv 0.5.0 or newer on the TV and open the phone app from the TV address (or the QR code). Close and reopen the phone app so it loads the new version.
+
+## The health numbers look high
+
+- **Cause:** taking the measurement adds a little load while the screen is open. Also, `top` on Android reports coarse steps (about 3%), and the process figures are percent of one core, while the cores show total percent.
+- **Fix:** nothing is wrong. Close the screen and the load goes away. Look at the verdict and the trend rather than a single number. See [05-health-and-maintenance.md](05-health-and-maintenance.md).
+
+## The automatic restart did not happen
+
+- **Cause:** one of these:
+  - the schedule is off or was not saved (the switch is off by default);
+  - the TV was on at that time: it only restarts in standby, tries again every 30 minutes for up to 6 hours, then skips to the next occurrence;
+  - the time is in the **TV's** time zone, not the phone's;
+  - the last restart was less than 12 hours ago, or the TV had booted less than 10 minutes before;
+  - the TV restarted but turned **Network debugging** off, so the remote does not work (some models do this).
+- **Fix:** check the schedule and the "Next restart" time in the TV health screen, and the TV time zone. If Network debugging is off after a restart, switch it on again and consider turning the schedule off for that TV.
+
+## "Clean cache" frees 0 MB
+
+- **Cause:** the cache was already clean, or the apps had very little temporary data.
+- **Fix:** nothing to fix. It is normal and does not mean it failed.
+
+## The link opens nothing on the TV
+
+- **Cause:** the TV has no app that handles that kind of link. Netflix, Prime Video or Disney+ links open only if the TV app handles that web link. Or Network debugging is off.
+- **Fix:** try a `youtu.be` or `youtube.com` link (the YouTube app must be installed on the TV). Check that **Network debugging** is on. Remember that it opens links only: it does not cast photos or videos from the phone and cannot send files. See [05-health-and-maintenance.md](05-health-and-maintenance.md#open-a-link-on-the-tv).
+
+## "This is not a web link"
+
+- **Cause:** only `http` and `https` links are accepted (no `file:`, `content:`, `intent:`, `market:`, `javascript:`).
+- **Fix:** paste a normal web link. A link without `http(s)://` but with a dot, such as `youtu.be/abc`, gets `https://` added by itself.
+
+## "The TV is not reachable" when opening a link
+
+- **Cause:** the TV is powered off at the plug, is not on the network, or Network debugging is off.
+- **Fix:** power the TV (a TV in standby is woken by the link), check the Wi-Fi and that **Network debugging** is on, then try again.
+
 ## The app looks old after an update
 
 - **Fix:** close and reopen it. If it stays old, delete the Home Screen icon and add it again.
