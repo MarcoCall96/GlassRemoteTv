@@ -208,7 +208,8 @@ final class Server {
                 return;
             }
             String token = headers.containsKey("x-gr-token") ? headers.get("x-gr-token") : query.get("token");
-            boolean protectedCall = path.equals("/api/shortcut") || path.equals("/api/info") || (path.equals("/api/scenes") && method.equals("PUT"));
+            boolean protectedCall = path.equals("/api/shortcut") || path.equals("/api/info") || path.equals("/api/stats") || path.equals("/api/open-link")
+                    || path.equals("/api/clean-cache") || path.equals("/api/maintenance") || (path.equals("/api/scenes") && method.equals("PUT"));
             if (protectedCall && !auth.valid(token)) {
                 json(out, 401, "{\"ok\":false,\"message\":\"PIN required\"}");
                 s.close();
@@ -248,6 +249,38 @@ final class Server {
             discover(out);
         } else if (path.equals("/api/info")) {
             info(out, q.get("host"));
+        } else if (path.equals("/api/stats")) {
+            try {
+                json(out, 200, tv.stats());
+            } catch (IOException e) {
+                json(out, 503, "{\"ok\":false,\"message\":\"unreachable\"}");
+            }
+        } else if (path.equals("/api/clean-cache")) {
+            if (!method.equals("POST")) {
+                json(out, 405, "{\"ok\":false,\"message\":\"post_only\"}");
+                return;
+            }
+            try {
+                json(out, 200, "{\"ok\":true,\"freedMb\":" + tv.cleanCache() + ",\"message\":\"\"}");
+            } catch (IOException e) {
+                boolean soon = "too_soon".equals(e.getMessage());
+                json(out, soon ? 429 : 503, "{\"ok\":false,\"message\":\"" + (soon ? "too_soon" : "unreachable") + "\"}");
+            }
+        } else if (path.equals("/api/open-link")) {
+            if (!method.equals("POST")) {
+                json(out, 405, "{\"ok\":false,\"message\":\"post_only\"}");
+                return;
+            }
+            String link;
+            try {
+                link = new JSONObject(new String(body, StandardCharsets.UTF_8)).optString("url", "");
+            } catch (JSONException e) {
+                link = "";
+            }
+            String r = tv.openLink(link);
+            json(out, r.equals("ok") ? 200 : r.equals("invalid_link") ? 400 : 503, "{\"ok\":" + r.equals("ok") + ",\"message\":\"" + r + "\"}");
+        } else if (path.equals("/api/maintenance")) {
+            maintenance(out, method, body);
         } else if (path.equals("/connect")) {
             String url = "http://" + lanIp() + ":" + port + "/";
             String html = "<!doctype html><meta charset=utf-8><meta name=viewport content=\"width=device-width,initial-scale=1\">"
@@ -257,6 +290,38 @@ final class Server {
         } else {
             asset(out, path);
         }
+    }
+
+    private void maintenance(OutputStream out, String method, byte[] body) throws IOException {
+        Maintenance m = ReceiverService.maintenance;
+        if (m == null) {
+            json(out, 503, "{\"ok\":false,\"message\":\"not ready\"}");
+            return;
+        }
+        if (method.equals("PUT")) {
+            try {
+                JSONObject r = new JSONObject(new String(body, StandardCharsets.UTF_8)).getJSONObject("reboot");
+                Schedule.Config c = new Schedule.Config();
+                c.enabled = r.getBoolean("enabled");
+                c.freq = r.getString("freq");
+                c.day = r.optInt("day", 1);
+                c.hour = r.getInt("hour");
+                c.minute = r.getInt("minute");
+                if (!c.valid()) throw new JSONException("invalid");
+                m.set(c);
+            } catch (JSONException e) {
+                json(out, 400, "{\"ok\":false,\"message\":\"invalid_settings\"}");
+                return;
+            } catch (IOException e) {
+                json(out, 500, "{\"ok\":false,\"message\":\"save_failed\"}");
+                return;
+            }
+        }
+        Schedule.Config c = m.get();
+        json(out, 200, "{\"ok\":true,\"reboot\":{\"enabled\":" + c.enabled + ",\"freq\":" + Stats.quote(c.freq) + ",\"day\":" + c.day
+                + ",\"hour\":" + c.hour + ",\"minute\":" + c.minute + "},\"lastRebootMs\":" + m.lastRebootMs() + ",\"nextRebootMs\":" + m.nextMs()
+                + ",\"note\":" + Stats.quote(m.note()) + ",\"nowMs\":" + System.currentTimeMillis()
+                + ",\"tzOffsetMin\":" + java.util.TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 60000 + "}");
     }
 
     private void asset(OutputStream out, String path) throws IOException {

@@ -35,6 +35,7 @@ final class TvLink {
     private final ScheduledExecutorService sched = Executors.newSingleThreadScheduledExecutor();
     private final List<Integer> pendingKeys = new ArrayList<>();
     private boolean drainScheduled;
+    volatile KeyInjector injector;
 
     volatile boolean enabled, connected;
     final boolean needsPairing = false;
@@ -64,6 +65,8 @@ final class TvLink {
                             Thread.sleep(connected ? 1000 : 5000);
                         } else if (enabled && connected) {
                             poll();
+                            KeyInjector k = injector;
+                            if (k != null) k.idleCheck();
                             Thread.sleep(2500);
                         } else {
                             Thread.sleep(1000);
@@ -100,6 +103,7 @@ final class TvLink {
                 connected = true;
                 error = "";
                 Log.i(TAG, "debug service connected");
+                warmUpInjector();
                 poll();
             } catch (Adb.NeedsAuthorization e) {
                 connected = false;
@@ -125,6 +129,7 @@ final class TvLink {
             connectOnce();
         } else {
             adb.close();
+            if (injector != null) injector.close();
             connected = false;
             error = "";
             changed();
@@ -143,9 +148,18 @@ final class TvLink {
     private void lost(IOException e) {
         Log.i(TAG, "debug connection lost: " + e);
         adb.close();
+        if (injector != null) injector.close();
         connected = false;
         isOn = null;
         changed();
+    }
+
+    private void warmUpInjector() {
+        final KeyInjector k = injector;
+        if (k == null || k.ready()) return;
+        worker.execute(new Runnable() {
+            public void run() { k.warmUp(); }
+        });
     }
 
     // ---------- status ----------
@@ -161,6 +175,7 @@ final class TvLink {
                 changed = true;
             }
             Boolean on = out.contains("mWakefulness=Awake") ? Boolean.TRUE : out.contains("mWakefulness=") ? Boolean.FALSE : isOn;
+            standby = out.contains("mWakefulness=Asleep") || out.contains("mWakefulness=Dozing");
             if (on != isOn) {
                 isOn = on;
                 changed = true;
@@ -208,6 +223,11 @@ final class TvLink {
         if (n.equals("EXIT")) n = "ESCAPE";
         int code = KeyEvent.keyCodeFromString("KEYCODE_" + n);
         if (code == KeyEvent.KEYCODE_UNKNOWN) return false;
+        KeyInjector inj = injector;
+        if (inj != null) {
+            if (inj.tap(new int[] { code })) return true;
+            warmUpInjector();
+        }
         synchronized (pendingKeys) {
             if (pendingKeys.size() < 12) pendingKeys.add(code);
             if (drainScheduled) return true;
@@ -242,14 +262,29 @@ final class TvLink {
     }
 
     void launch(String link) {
-        if (link == null || link.isEmpty() || link.length() > 1024 || link.indexOf('\u0000') >= 0) return;
+        if (link == null || link.isEmpty()) return;
         if (link.contains("://")) {
-            shell("am start -a android.intent.action.VIEW -d " + quote(link));
-        } else {
+            if (!Links.isWebLink(link)) return;
+            shell("am start -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d " + quote(link));
+        } else if (Links.isPackageName(link)) {
             String p = quote(link);
             shell("monkey -p " + p + " -c android.intent.category.LEANBACK_LAUNCHER 1 2>&1 | grep -q 'No activities' && monkey -p " + p
                     + " -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1");
         }
+    }
+
+    /** Opens a web link on the TV (waking it first if it is in standby). Returns "ok", "invalid_link" or "unreachable". */
+    String openLink(String link) {
+        if (!Links.isWebLink(link)) return "invalid_link";
+        setEnabled(true);
+        if (!waitConnected(10)) return "unreachable";
+        poll();
+        if (standby) {
+            shell("input keyevent 224");
+            try { Thread.sleep(2500); } catch (InterruptedException ignored) { }
+        }
+        launch(link);
+        return "ok";
     }
 
     void setVolume(final int target) {
@@ -266,6 +301,77 @@ final class TvLink {
                 }
             }
         });
+    }
+
+    // ---------- health and maintenance ----------
+
+    private final Stats statsReader = new Stats();
+    private long lastCacheCleanMs, statsAt;
+    private String statsCache = "";
+    volatile boolean standby;
+
+    /** Current load figures as JSON text (see {@link Stats}); a reading younger than 2 seconds is reused. */
+    synchronized String stats() throws IOException {
+        if (!connected) throw new IOException("unreachable");
+        long now = System.currentTimeMillis();
+        if (now - statsAt < 2000 && !statsCache.isEmpty()) return statsCache;
+        try {
+            if (!statsReader.fresh(now)) {
+                statsReader.feed(adb.exec("head -5 /proc/stat"), now);
+                Thread.sleep(500);
+            }
+            statsCache = statsReader.toJson(adb.exec(Stats.COMMAND, 20000), System.currentTimeMillis());
+            statsAt = System.currentTimeMillis();
+            return statsCache;
+        } catch (InterruptedException e) {
+            throw new IOException("unreachable");
+        } catch (IOException e) {
+            lost(e);
+            throw new IOException("unreachable");
+        }
+    }
+
+    /** Empties the apps' caches (never their data) and returns how many MB were freed. */
+    synchronized long cleanCache() throws IOException {
+        if (!connected) throw new IOException("unreachable");
+        long now = System.currentTimeMillis();
+        if (now - lastCacheCleanMs < 10000) throw new IOException("too_soon");
+        lastCacheCleanMs = now;
+        try {
+            long before = usedKb();
+            adb.exec("pm trim-caches 100G", 60000);
+            long after = usedKb();
+            return Math.max(0, (before - after) / 1024);
+        } catch (IOException e) {
+            lost(e);
+            throw new IOException("unreachable");
+        }
+    }
+
+    private long usedKb() throws IOException {
+        String[] t = adb.exec("df /data | tail -1").trim().split("\\s+");
+        try {
+            return t.length > 2 ? Long.parseLong(t[2]) : 0;
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    /** Restarts the TV, but only if it is in standby. Returns "rebooting", "busy" or "unreachable". */
+    String rebootIfStandby() {
+        boolean was = enabled;
+        setEnabled(true);
+        boolean rebooting = false;
+        try {
+            if (!waitConnected(15)) return "unreachable";
+            poll();
+            if (!standby) return "busy";
+            rebooting = true;
+            shell("reboot");
+            return "rebooting";
+        } finally {
+            if (!was && !rebooting) setEnabled(false);
+        }
     }
 
     synchronized void sleepTimer(int minutes) {

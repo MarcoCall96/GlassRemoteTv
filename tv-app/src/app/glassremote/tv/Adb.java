@@ -12,6 +12,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.security.Signature;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /** A minimal ADB client (the protocol behind "adb shell"), used to talk to this TV's own debug service. */
 final class Adb {
@@ -74,10 +76,14 @@ final class Adb {
     }
 
     /** Runs a shell command on the TV and returns what it printed. */
-    synchronized String exec(String cmd) throws IOException {
+    synchronized String exec(String cmd) throws IOException { return exec(cmd, 0); }
+
+    /** Same, allowing a longer wait for slow commands (0 keeps the normal limit). */
+    synchronized String exec(String cmd, int timeoutMs) throws IOException {
         if (!isOpen()) throw new IOException("not connected");
         int local = nextId++;
         try {
+            if (timeoutMs > 0) sock.setSoTimeout(timeoutMs);
             send(OPEN, local, 0, ("shell:" + cmd + "\0").getBytes(StandardCharsets.UTF_8));
             ByteArrayOutputStream result = new ByteArrayOutputStream();
             int remote = 0;
@@ -97,7 +103,83 @@ final class Adb {
         } catch (IOException e) {
             close();
             throw e;
+        } finally {
+            if (timeoutMs > 0 && sock != null) try { sock.setSoTimeout(8000); } catch (IOException ignored) { }
         }
+    }
+
+    // ---------- long-lived stream ----------
+
+    /** A shell command that keeps running while we keep writing to its input. It stops when this connection closes. */
+    final class Stream {
+        private final int local;
+        private volatile int remote;
+        private volatile boolean closed;
+        private final Semaphore window = new Semaphore(0);
+        private final StringBuilder output = new StringBuilder();
+
+        private Stream(int local) { this.local = local; }
+
+        boolean isClosed() { return closed; }
+
+        String output() {
+            synchronized (output) { return output.toString(); }
+        }
+
+        void write(byte[] data) throws IOException {
+            if (closed) throw new IOException("closed");
+            try {
+                if (!window.tryAcquire(1500, TimeUnit.MILLISECONDS)) throw new IOException("stream stalled");
+            } catch (InterruptedException e) {
+                throw new IOException("interrupted");
+            }
+            send(WRTE, local, remote, data);
+        }
+
+        void close() {
+            closed = true;
+            Adb.this.close();
+        }
+    }
+
+    /** Opens a shell command on a connection that is used for nothing else (it reads on its own thread). */
+    synchronized Stream openStream(String cmd) throws IOException {
+        if (!isOpen()) throw new IOException("not connected");
+        final int local = nextId++;
+        final Stream st = new Stream(local);
+        sock.setSoTimeout(0);
+        send(OPEN, local, 0, ("shell:" + cmd + "\0").getBytes(StandardCharsets.UTF_8));
+        Pkt first = read();
+        if (first.cmd != OKAY || first.arg1 != local) throw new IOException("could not open the shell");
+        st.remote = first.arg0;
+        st.window.release();
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    while (!st.closed) {
+                        Pkt p = read();
+                        if (p.arg1 != local) continue;
+                        if (p.cmd == OKAY) {
+                            st.window.release();
+                        } else if (p.cmd == WRTE) {
+                            synchronized (st.output) {
+                                if (st.output.length() < 2048) st.output.append(new String(p.data, StandardCharsets.UTF_8));
+                            }
+                            send(OKAY, local, p.arg0, new byte[0]);
+                        } else if (p.cmd == CLSE) {
+                            break;
+                        }
+                    }
+                } catch (IOException ignored) {
+                } finally {
+                    st.closed = true;
+                    Adb.this.close();
+                }
+            }
+        }, "adb-stream");
+        t.setDaemon(true);
+        t.start();
+        return st;
     }
 
     // ---------- packets ----------
@@ -106,6 +188,8 @@ final class Adb {
         int cmd, arg0, arg1;
         byte[] data;
     }
+
+    private final Object writeLock = new Object();
 
     private void send(int cmd, int a0, int a1, byte[] data) throws IOException {
         int sum = 0;
@@ -117,9 +201,11 @@ final class Adb {
         put(h, 12, data.length);
         put(h, 16, sum);
         put(h, 20, cmd ^ 0xFFFFFFFF);
-        out.write(h);
-        if (data.length > 0) out.write(data);
-        out.flush();
+        synchronized (writeLock) {
+            out.write(h);
+            if (data.length > 0) out.write(data);
+            out.flush();
+        }
     }
 
     private Pkt read() throws IOException {

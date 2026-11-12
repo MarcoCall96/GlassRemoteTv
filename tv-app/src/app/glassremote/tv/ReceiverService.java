@@ -13,6 +13,7 @@ import android.util.Log;
 public class ReceiverService extends Service {
     static volatile TvLink link;
     static volatile Server server;
+    static volatile Maintenance maintenance;
     static volatile String startError = "";
     private static boolean starting;
 
@@ -49,10 +50,14 @@ public class ReceiverService extends Service {
                             if (s != null) s.broadcastState();
                         }
                     });
+                    l.injector = new KeyInjector(id, getPackageCodePath());
                     Server s = new Server(getApplicationContext(), l);
                     holder[0] = s;
+                    Maintenance mt = new Maintenance(getFilesDir(), l);
+                    maintenance = mt;
                     s.start();
                     l.start();
+                    mt.start();
                     link = l;
                     server = s;
                     startError = "";
