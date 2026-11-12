@@ -528,7 +528,22 @@ async function scan(force = false) {
 $("#scanBtn").addEventListener("click", () => scan(true));
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { scan(); connectAll(); } });
 addEventListener("online", () => { scan(); connectAll(); });
-$("#saveBridge").addEventListener("click", () => { state.bridge = $("#bridgeUrl").value.trim(); localStorage.setItem("bridge", state.bridge); closeAll(); connectAll(); scan(); loadScenes(); });
+function parseAddress(v) {
+  const m = String(v || "").trim().match(/^(?:\w+:\/\/)?([^\/\s:?#]+)(?::(\d+))?/);
+  return m ? { host: m[1], port: m[2] || "8780" } : null;
+}
+const addressText = (ws) => String(ws || "").replace(/^wss?:\/\//, "").replace(/\/ws.*$/, "");
+$("#saveBridge").addEventListener("click", () => {
+  const raw = $("#bridgeUrl").value.trim();
+  const a = raw ? parseAddress(raw) : null;
+  if (raw && !a) return toast(tr("settings.bridgeBad"));
+  /* an https page cannot open a connection to a device on the home network (browsers block it),
+     so from the web page we open the app that the TV itself serves: it connects on its own */
+  if (a && location.protocol === "https:") { toast(tr("settings.bridgeOpening")); location.href = `http://${a.host}:${a.port}/`; return; }
+  state.bridge = a ? `ws://${a.host}:${a.port}/ws` : "";
+  state.bridge ? localStorage.setItem("bridge", state.bridge) : localStorage.removeItem("bridge");
+  closeAll(); connectAll(); scan(); loadScenes();
+});
 
 /* ---------- keys (auto-repeat while held) ---------- */
 function press(code) {
@@ -998,9 +1013,11 @@ function bindSwitch(id, key, apply) {
 }
 bindSwitch("#hapticSwitch", "haptic");
 bindSwitch("#oneSwitch", "onehand", () => $("#app").classList.toggle("onehand", state.onehand));
-$("#bridgeUrl").value = state.bridge;
+$("#bridgeUrl").value = addressText(state.bridge);
 
 /* ---------- language: glass sheet instead of a native dropdown ---------- */
+/* version shown at the bottom of Settings: it comes from version.js, the single place where it is written */
+function paintFooter() { $("#appFooter").textContent = tr("settings.footer", { v: "v" + (self.APP_VERSION || "") }); }
 function paintLang() {
   const pref = i18n.pref;
   $("#langCur").textContent = pref ? i18n.names[pref] : tr("settings.langAuto").replace(/\s*\(.*\)$/, "") + " · " + i18n.names[i18n.lang];
@@ -1019,13 +1036,13 @@ $("#langList").addEventListener("click", (e) => {
 });
 document.addEventListener("langchange", () => {
   renderBrands(); renderKb(); refreshSceneApps(); renderSiri(); renderTvs(); refreshRemote(); refreshApps();
-  paintEditButtons(); paintScanHint(); paintConnHint(); paintLang();
+  paintEditButtons(); paintScanHint(); paintConnHint(); paintLang(); paintFooter();
   requestAnimationFrame(refreshLenses);
 });
 
 /* ---------- start ---------- */
 refreshSceneApps(); renderSiri();
-paintEditButtons(); paintConnHint(); paintLang();
+paintEditButtons(); paintConnHint(); paintLang(); paintFooter();
 renderTvs();
 connectAll();
 scan();

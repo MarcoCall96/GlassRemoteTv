@@ -1,9 +1,10 @@
 /* Service worker: the app shell (pages, styles, scripts, icons) stays cached, so the app opens even
    without a connection to the receiver. Calls to the receiver (/api, /ws) are never cached. */
-const VERSION = "v0.4.6";
+importScripts("./version.js");
+const VERSION = "v" + self.APP_VERSION;
 const CACHE = "glassremote-" + VERSION;
 const SHELL = [
-  "./", "./index.html", "./styles.css", "./app.js", "./i18n.js", "./logos.js", "./manifest.webmanifest",
+  "./", "./index.html", "./styles.css", "./app.js", "./i18n.js", "./logos.js", "./version.js", "./manifest.webmanifest",
   "./lang/en.js", "./lang/it.js", "./lang/es.js", "./lang/fr.js", "./lang/de.js", "./lang/pt.js",
   "./assets/icon-192.png", "./assets/icon-512.png", "./assets/apple-touch-icon.png",
 ];

@@ -92,8 +92,9 @@
   "settings.siriHint": "In <b>Shortcuts</b> choose <b>Get contents of URL</b>, paste the address and name the shortcut with the phrase you will say to Siri. It only works on your home Wi-Fi.",
   "settings.usage": "Usage", "settings.oneHand": "One-handed mode", "settings.haptic": "Key vibration",
   "settings.hapticHint": "Vibration only works on Android: iPhone does not allow it for web apps.",
-  "settings.advanced": "Advanced", "settings.bridge": "Receiver address", "settings.bridgePh": "Empty = automatic",
-  "settings.saveBridge": "Save and connect", "settings.footer": "GlassRemote v0.4 · no ads",
+  "settings.bridgeHint": "The address your TV shows in the GlassRemoteTv app (or of the computer running the receiver). From the web page it opens your TV's own copy of the app: browsers do not let this page talk to your home network.", "settings.bridgeBad": "Type the address, like 192.168.1.3:8780.", "settings.bridgeOpening": "Opening your TV…", "remote.settings": "TV settings",
+  "settings.advanced": "Advanced", "settings.bridge": "Receiver address", "settings.bridgePh": "e.g. 192.168.1.3:8780",
+  "settings.saveBridge": "Save and connect", "settings.footer": "GlassRemote {v} · no ads",
 
   "siri.noBridge": "Open the app from the receiver address to see the addresses.", "siri.on": "Turn on the TV",
   "siri.off": "Turn off the TV", "siri.mute": "Mute", "siri.sleep30": "Turn off in 30 minutes",

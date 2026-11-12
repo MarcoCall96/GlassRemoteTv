@@ -92,8 +92,9 @@
   "settings.siriHint": "Dans <b>Raccourcis</b>, choisissez <b>Obtenir le contenu de l'URL</b>, collez l'adresse et donnez au raccourci la phrase que vous direz à Siri. Fonctionne uniquement sur votre Wi-Fi à la maison.",
   "settings.usage": "Utilisation", "settings.oneHand": "Mode une main", "settings.haptic": "Vibration des touches",
   "settings.hapticHint": "La vibration ne fonctionne que sur Android : l'iPhone ne la permet pas aux apps web.",
-  "settings.advanced": "Avancé", "settings.bridge": "Adresse du récepteur", "settings.bridgePh": "Vide = automatique",
-  "settings.saveBridge": "Enregistrer et connecter", "settings.footer": "GlassRemote v0.4 · sans publicité",
+  "settings.bridgeHint": "L'adresse que votre TV affiche dans l'app GlassRemoteTv (ou celle de l'ordinateur avec le récepteur). Depuis la page web, elle ouvre la copie de l'app qui est sur la TV : les navigateurs empêchent cette page de parler à votre réseau local.", "settings.bridgeBad": "Saisissez l'adresse, par exemple 192.168.1.3:8780.", "settings.bridgeOpening": "Ouverture de votre TV…", "remote.settings": "Réglages de la TV",
+  "settings.advanced": "Avancé", "settings.bridge": "Adresse du récepteur", "settings.bridgePh": "ex. 192.168.1.3:8780",
+  "settings.saveBridge": "Enregistrer et connecter", "settings.footer": "GlassRemote {v} · sans publicité",
 
   "siri.noBridge": "Ouvrez l'app depuis l'adresse du récepteur pour voir les adresses.", "siri.on": "Allumer la TV",
   "siri.off": "Éteindre la TV", "siri.mute": "Muet", "siri.sleep30": "Éteindre dans 30 minutes",
