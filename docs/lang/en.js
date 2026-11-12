@@ -85,6 +85,7 @@
 
   "err.unreachable": "The TV is unreachable.", "err.wrong_code": "Wrong code: read the new code on the TV.",
   "err.pairing_expired": "Pairing expired: try again.",
+  "err.adb_off": "Turn on network debugging in the TV's developer options.", "err.adb_authorize": "Allow the connection on the TV screen (tick Always allow).",
 
   "settings.title": "Settings", "settings.language": "Language", "settings.langAuto": "Automatic (phone language)",
   "settings.siri": "Siri and Shortcuts",

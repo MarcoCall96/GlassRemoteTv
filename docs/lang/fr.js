@@ -85,6 +85,7 @@
 
   "err.unreachable": "La TV est injoignable.", "err.wrong_code": "Code incorrect : regardez le nouveau code sur la TV.",
   "err.pairing_expired": "Association expirée : réessayez.",
+  "err.adb_off": "Activez le débogage réseau dans les options pour les développeurs de la TV.", "err.adb_authorize": "Autorisez la connexion sur l'écran de la TV (cochez Toujours autoriser).",
 
   "settings.title": "Réglages", "settings.language": "Langue", "settings.langAuto": "Automatique (langue du téléphone)",
   "settings.siri": "Siri et Raccourcis",

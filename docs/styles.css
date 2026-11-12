@@ -376,7 +376,10 @@ input[type=range]::-moz-range-thumb { width: 28px; height: 28px; border: 0; bord
 .flip-inner { position: absolute; inset: 0; transform-style: preserve-3d; }
 .flip-face { position: absolute; inset: 0; border-radius: 32px; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden;
   background: linear-gradient(160deg, rgba(68,76,108,.985), rgba(22,25,40,.995)); box-shadow: var(--rim), 0 28px 70px rgba(0,0,0,.6); }
-.flip-face.back { transform: rotateY(180deg); display: flex; flex-direction: column; padding: 18px 16px 14px; position: absolute; }
+/* Safari draws children that have their own layer even when the face is turned away: hide them with the face */
+.flip-face * { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip-face.front { transform: rotateY(0deg) translateZ(1px); }
+.flip-face.back { transform: rotateY(180deg) translateZ(1px); display: flex; flex-direction: column; padding: 18px 16px 14px; position: absolute; }
 .flip-face.front .tv-card { width: 100%; height: 100%; border-radius: 0; box-shadow: none; min-height: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 .d-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 .d-title { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }

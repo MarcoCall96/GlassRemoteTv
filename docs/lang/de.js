@@ -85,6 +85,7 @@
 
   "err.unreachable": "Der TV ist nicht erreichbar.", "err.wrong_code": "Falscher Code: Sieh dir den neuen Code auf dem TV an.",
   "err.pairing_expired": "Kopplung abgelaufen: Versuche es erneut.",
+  "err.adb_off": "Aktiviere das Netzwerk-Debugging in den Entwickleroptionen des TVs.", "err.adb_authorize": "Erlaube die Verbindung auf dem TV-Bildschirm (Immer zulassen anhaken).",
 
   "settings.title": "Einstellungen", "settings.language": "Sprache", "settings.langAuto": "Automatisch (Sprache des Telefons)",
   "settings.siri": "Siri und Kurzbefehle",

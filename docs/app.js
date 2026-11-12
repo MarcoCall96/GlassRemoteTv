@@ -834,7 +834,7 @@ async function openDetail(i, cardEl) {
   paintNameRow(tv, false);
   paintDetailHead();
   $("#sheetBackdrop").hidden = false;
-  flip.hidden = false; flip.style.cssText = ""; flipInner.style.transform = "";
+  flip.hidden = false; flip.style.cssText = ""; flipInner.style.transform = ""; $("#flipFront").style.visibility = "";
   const from = rel(cardEl), to = rel(flip);
   cardEl.style.visibility = "hidden";
   flip.style.right = "auto"; flip.style.bottom = "auto";
@@ -844,6 +844,7 @@ async function openDetail(i, cardEl) {
   flipInner.animate([{ transform: "rotateY(0deg)" }, { transform: "rotateY(180deg)" }], { duration: FLIP_MS, easing: "cubic-bezier(.45,.05,.25,1)" });
   await move.finished;
   flip.style.cssText = "";
+  $("#flipFront").style.visibility = "hidden";
   loadDetail();
   if (detail) detail.timer = setInterval(loadDetail, 5000);
 }
@@ -855,6 +856,7 @@ async function closeDetail() {
   const card = $(`.tv-card[data-i="${d.i}"]`);
   $("#sheetBackdrop").hidden = true;
   if (!card) { flip.hidden = true; return; }
+  $("#flipFront").style.visibility = "";
   const from = rel(flip), to = rel(card);
   flip.style.right = "auto"; flip.style.bottom = "auto";
   Object.assign(flip.style, px(to));

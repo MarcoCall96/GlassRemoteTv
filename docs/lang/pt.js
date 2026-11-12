@@ -85,6 +85,7 @@
 
   "err.unreachable": "A TV está inacessível.", "err.wrong_code": "Código errado: veja o novo código na TV.",
   "err.pairing_expired": "Emparelhamento expirado: tente de novo.",
+  "err.adb_off": "Ative a depuração de rede nas opções de programador da TV.", "err.adb_authorize": "Permita a ligação no ecrã da TV (marque Permitir sempre).",
 
   "settings.title": "Definições", "settings.language": "Idioma", "settings.langAuto": "Automático (idioma do telemóvel)",
   "settings.siri": "Siri e Atalhos",

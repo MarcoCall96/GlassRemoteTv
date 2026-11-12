@@ -85,6 +85,7 @@
 
   "err.unreachable": "La TV non è raggiungibile.", "err.wrong_code": "Codice errato: guarda il nuovo codice sulla TV.",
   "err.pairing_expired": "Abbinamento scaduto: riprova.",
+  "err.adb_off": "Attiva il debug di rete nelle opzioni sviluppatore della TV.", "err.adb_authorize": "Consenti il collegamento sullo schermo della TV (spunta Consenti sempre).",
 
   "settings.title": "Impostazioni", "settings.language": "Lingua", "settings.langAuto": "Automatica (lingua del telefono)",
   "settings.siri": "Siri e Comandi Rapidi",

@@ -85,6 +85,7 @@
 
   "err.unreachable": "No se puede acceder a la TV.", "err.wrong_code": "Código incorrecto: mira el nuevo código en la TV.",
   "err.pairing_expired": "La vinculación ha caducado: inténtalo de nuevo.",
+  "err.adb_off": "Activa la depuración de red en las opciones de desarrollador de la TV.", "err.adb_authorize": "Permite la conexión en la pantalla de la TV (marca Permitir siempre).",
 
   "settings.title": "Ajustes", "settings.language": "Idioma", "settings.langAuto": "Automático (idioma del teléfono)",
   "settings.siri": "Siri y Atajos",
